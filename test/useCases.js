@@ -73,6 +73,9 @@ describe('stop timer use case', () => {
 
 describe('decrement timer use case', () => {
   describe('happy path', () => {
+
+    const saveTimer = () => console.log('timer saved!')
+
     it('should return timer decremented by interval', () => {
       const getTimerById = () =>  ({
         id: "1",
@@ -81,7 +84,6 @@ describe('decrement timer use case', () => {
         intervalDurationInMs: 500,
         isRunning: true
       })
-      const saveTimer = () => console.log('timer saved!')
       const decrementedTimer = core.decrementTimerUseCase(getTimerById)(saveTimer)("1")
       decrementedTimer.should.be.an('object')
       decrementedTimer.id.should.equal("1")
@@ -89,6 +91,24 @@ describe('decrement timer use case', () => {
       decrementedTimer.remainingDurationInMs.should.equal(500)
       decrementedTimer.intervalDurationInMs.should.equal(500)
       decrementedTimer.isRunning.should.equal(true)
+    })
+    describe('when remainingDurationInMs <= 0', () => {
+      it('should stop the timer', () => {
+        const getTimerById = () =>  ({
+          id: "1",
+          durationInMs: 1000,
+          remainingDurationInMs: 1000,
+          intervalDurationInMs: 1000,
+          isRunning: true
+        })
+        const decrementedTimer = core.decrementTimerUseCase(getTimerById)(saveTimer)("1")
+        decrementedTimer.should.be.an('object')
+        decrementedTimer.id.should.equal("1")
+        decrementedTimer.durationInMs.should.equal(1000)
+        decrementedTimer.remainingDurationInMs.should.equal(0)
+        decrementedTimer.intervalDurationInMs.should.equal(1000)
+        decrementedTimer.isRunning.should.equal(false)
+      })
     })
   })
 })
