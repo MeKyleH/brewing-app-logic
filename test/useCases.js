@@ -10,15 +10,15 @@ describe('create timer use case', () => {
       timer.should.be.an('object')
       timer.should.have.property('id')
       timer.id.should.be.a('string')
-      timer.should.have.property('durationInMs')
-      timer.durationInMs.should.be.a('number')
-      timer.durationInMs.should.equal(1000)
-      timer.should.have.property('remainingDurationInMs')
-      timer.remainingDurationInMs.should.be.a('number')
-      timer.remainingDurationInMs.should.equal(1000)
-      timer.should.have.property("intervalDurationInMs")
-      timer.intervalDurationInMs.should.be.a('number')
-      timer.intervalDurationInMs.should.equal(1000)
+      timer.should.have.property('duration')
+      timer.duration.should.be.a('number')
+      timer.duration.should.equal(1000)
+      timer.should.have.property('remainingDuration')
+      timer.remainingDuration.should.be.a('number')
+      timer.remainingDuration.should.equal(1000)
+      timer.should.have.property("intervalDuration")
+      timer.intervalDuration.should.be.a('number')
+      timer.intervalDuration.should.equal(1000)
       timer.should.have.property('isRunning')
       timer.isRunning.should.be.a('boolean')
       timer.isRunning.should.equal(false)
@@ -32,18 +32,18 @@ describe('start timer use case', () => {
     it('should return the timer with isRunning true', () => {
       const getTimerById = () =>  ({
         id: "1",
-        durationInMs: 1000,
-        remainingDurationInMs: 1000,
-        intervalDurationInMs: 1000,
+        duration: 1000,
+        remainingDuration: 1000,
+        intervalDuration: 1000,
         isRunning: false
       })
       const saveTimer = () => console.log('timer saved!')
       const startedTimer = core.startTimerUseCase(getTimerById)(saveTimer)("1")
       startedTimer.should.be.an('object')
       startedTimer.id.should.equal("1")
-      startedTimer.durationInMs.should.equal(1000)
-      startedTimer.remainingDurationInMs.should.equal(1000)
-      startedTimer.intervalDurationInMs.should.equal(1000)
+      startedTimer.duration.should.equal(1000)
+      startedTimer.remainingDuration.should.equal(1000)
+      startedTimer.intervalDuration.should.equal(1000)
       startedTimer.isRunning.should.equal(true)
     })
   })
@@ -54,18 +54,18 @@ describe('stop timer use case', () => {
     it('should return the timer with isRunning false', () => {
       const getTimerById = () =>  ({
         id: "1",
-        durationInMs: 1000,
-        remainingDurationInMs: 1000,
-        intervalDurationInMs: 1000,
+        duration: 1000,
+        remainingDuration: 1000,
+        intervalDuration: 1000,
         isRunning: true
       })
       const saveTimer = () => console.log('timer saved!')
       const stoppedTimer = core.stopTimerUseCase(getTimerById)(saveTimer)("1")
       stoppedTimer.should.be.an('object')
       stoppedTimer.id.should.equal("1")
-      stoppedTimer.durationInMs.should.equal(1000)
-      stoppedTimer.remainingDurationInMs.should.equal(1000)
-      stoppedTimer.intervalDurationInMs.should.equal(1000)
+      stoppedTimer.duration.should.equal(1000)
+      stoppedTimer.remainingDuration.should.equal(1000)
+      stoppedTimer.intervalDuration.should.equal(1000)
       stoppedTimer.isRunning.should.equal(false)
     })
   })
@@ -79,34 +79,34 @@ describe('decrement timer use case', () => {
     it('should return timer decremented by interval', () => {
       const getTimerById = () =>  ({
         id: "1",
-        durationInMs: 1000,
-        remainingDurationInMs: 1000,
-        intervalDurationInMs: 500,
+        duration: 1000,
+        remainingDuration: 1000,
+        intervalDuration: 500,
         isRunning: true
       })
       const decrementedTimer = core.decrementTimerUseCase(getTimerById)(saveTimer)("1")
       decrementedTimer.should.be.an('object')
       decrementedTimer.id.should.equal("1")
-      decrementedTimer.durationInMs.should.equal(1000)
-      decrementedTimer.remainingDurationInMs.should.equal(500)
-      decrementedTimer.intervalDurationInMs.should.equal(500)
+      decrementedTimer.duration.should.equal(1000)
+      decrementedTimer.remainingDuration.should.equal(500)
+      decrementedTimer.intervalDuration.should.equal(500)
       decrementedTimer.isRunning.should.equal(true)
     })
-    describe('when remainingDurationInMs <= 0', () => {
+    describe('when remainingDuration <= 0', () => {
       it('should stop the timer', () => {
         const getTimerById = () =>  ({
           id: "1",
-          durationInMs: 1000,
-          remainingDurationInMs: 1000,
-          intervalDurationInMs: 1000,
+          duration: 1000,
+          remainingDuration: 1000,
+          intervalDuration: 1000,
           isRunning: true
         })
         const decrementedTimer = core.decrementTimerUseCase(getTimerById)(saveTimer)("1")
         decrementedTimer.should.be.an('object')
         decrementedTimer.id.should.equal("1")
-        decrementedTimer.durationInMs.should.equal(1000)
-        decrementedTimer.remainingDurationInMs.should.equal(0)
-        decrementedTimer.intervalDurationInMs.should.equal(1000)
+        decrementedTimer.duration.should.equal(1000)
+        decrementedTimer.remainingDuration.should.equal(0)
+        decrementedTimer.intervalDuration.should.equal(1000)
         decrementedTimer.isRunning.should.equal(false)
       })
     })
@@ -118,18 +118,18 @@ describe('reset timer use case', () => {
     it('should return the timer with remainingDuration === duration', () => {
       const getTimerById = () =>  ({
         id: "1",
-        durationInMs: 1000,
-        remainingDurationInMs: 200,
-        intervalDurationInMs: 1000,
+        duration: 1000,
+        remainingDuration: 200,
+        intervalDuration: 1000,
         isRunning: true
       })
       const saveTimer = () => console.log('timer saved!')
       const resetTimer = core.resetTimerUseCase(getTimerById)(saveTimer)("1")
       resetTimer.should.be.an('object')
       resetTimer.id.should.equal("1")
-      resetTimer.durationInMs.should.equal(1000)
-      resetTimer.remainingDurationInMs.should.equal(1000)
-      resetTimer.intervalDurationInMs.should.equal(1000)
+      resetTimer.duration.should.equal(1000)
+      resetTimer.remainingDuration.should.equal(1000)
+      resetTimer.intervalDuration.should.equal(1000)
       resetTimer.isRunning.should.equal(true)
     })
   })
