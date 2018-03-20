@@ -1,27 +1,45 @@
 const chai = require('chai')
 const should = chai.should()
-const expect = chai.expect
 const core = require('../../lib')
 
-describe('timer alert entity factory function', () => {
+describe('createTimerAlert use case', () => {
 
-  const timerAlertFactory = core.timerAlertEntity
+  let createTimerAlertCalled = false
+  let createdTimerAlert = "timerAlert"
   
+  const createTimerAlert = timerAlert => {
+    createTimerAlertCalled = true
+    createdTimerAlert = timerAlert
+  }
+
+  const timerAlertFactory = core.createTimerAlertUseCase(createTimerAlert)
+  const timerAlert = timerAlertFactory("1", 1000, "test")
+
   describe('happy path', () => {
 
-    const timerAlert = timerAlertFactory("1", 1000, "hello")
-    
+    it('should call createTimer injected dependency', () => {
+      createTimerAlertCalled.should.equal(true)
+    })
+
+    it('should pass createdTimer to createTimer', () => {
+      createdTimerAlert.should.be.an('object')
+    })
+
+    it('should return function after createTimer is injected', () => {
+      timerAlertFactory.should.be.a('function')
+    })
+
     it('should return an object', () => {
       timerAlert.should.be.an('object')
     })
-    
+
     it('should have string id', () => {
       timerAlert.should.have.property("id")
       timerAlert.id.should.be.a("string")
-    })
+    }) 
 
     it('should generate unique string ids', () => {
-      otherTimerAlert = timerAlertFactory("1", 1000, "test")
+      otherTimerAlert = timerAlertFactory("1", 1000, "test2")
       otherTimerAlert.id.should.not.equal(timerAlert.id)
     })
 
@@ -63,31 +81,6 @@ describe('timer alert entity factory function', () => {
     it('should have activated prop equal false', () => {
       timerAlert.activated.should.equal(false)
     })
-  })
-
-  describe('error paths', () => {
-    describe('when first arg is of wrong type', () => {
-      
-      it('should throw a type error', () => {
-        expect(() => timerAlertFactory(1, 1000, "bad")).to.throw(TypeError)
-      })
-
-    })
-
-    describe('when second arg is of wrong type', () => {
-
-      it('should throw a type error', () => {
-        expect(() => timerAlertFactory("1", "1000", "bad")).to.throw(TypeError)
-      })
-
-    })
-
-    describe('when third arg is of wrong type', () => {
-
-      it('should throw a type error', () => {
-        expect(() => timerAlertFactory("1", 1000, 100)).to.throw(TypeError)
-      })
-
-    })
+  
   })
 })
