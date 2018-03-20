@@ -84,3 +84,58 @@ describe('createTimerAlert use case', () => {
   
   })
 })
+
+describe('updateTimerAlert use case', () => {
+
+  describe('happy path', () => {
+
+    let getTimerAlertByIdCalled = false
+    let getTimerAlertId = 0
+    let saveTimerCalled = false
+    let savedTimerAlert = {}
+    const timerAlert = {
+      id: "1",
+      name: "timerAlert",
+      message: "hello"
+    }
+
+    const getTimerAlertById = timerAlertId => {
+      getTimerAlertByIdCalled = true
+      getTimerAlertId = timerAlertId
+      return timerAlert
+    }
+
+    const saveTimer = timerAlert => {
+      saveTimerCalled = true
+      savedTimerAlert = timerAlert
+    }
+
+    const updateTimerAlert = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimer)
+    const updatedTimerAlert = updateTimerAlert("1", {message: "new message", activationTime: 20, timerId: "blargh"})
+
+    it('should call getTimerAlertById injected dependency', () => {
+      getTimerAlertByIdCalled.should.equal(true)
+    })
+
+    it('should call getTimerAlertById with passed timerId', () => {
+      getTimerAlertId.should.equal("1")
+    })
+
+    it('should call saveTimer injected dependency', () => {
+      saveTimerCalled.should.equal(true)
+    })
+
+    it('should pass timerAlert from getTimerAlertId to saveTimer', () => {
+      savedTimerAlert.should.equal(timerAlert)
+    })
+
+    it('should return new timerAlert with fields updated to match args', () => {
+      updatedTimerAlert.message.should.equal("new message")
+      updatedTimerAlert.activationTime.should.equal(20)
+      updatedTimerAlert.timerId.should.equal("blargh")
+      timerAlert.should.deep.equal({id: "1",name: "timerAlert",message: "hello"})
+    })
+
+  })
+
+})
