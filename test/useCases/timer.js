@@ -1,4 +1,4 @@
-const core = require('../lib')
+const core = require('../../lib')
 const chai = require('chai')
 const should = chai.should()
 
