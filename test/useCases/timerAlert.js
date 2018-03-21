@@ -239,6 +239,20 @@ describe('updateTimerAlert use case', () => {
       })
     })
 
+    describe('when getTimerAlertById throws error', () => {
+      it('should throw error', () => {
+        const getTimerAlertByIdError = () => {throw new Error}
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertByIdError)(saveTimerAlert)("1", {message: "hello"})).to.throw()
+      })
+    })
+
+    describe('when getTimerAlertById returns nothing', () => {
+      it('should throw an error', () => {
+        const getTimerAlertByIdNull = () => {}
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertByIdNull)(saveTimerAlert)("1", {message: "hello"})).to.throw()
+      })
+    })
+
   })
 
 })
@@ -308,6 +322,40 @@ describe("activateTimerAlert use case", () => {
       activatedTimerAlert.activated.should.equal(true)
       activatedTimerAlert.should.not.equal(dummyTimerAlert)
       dummyTimerAlert.should.deep.equal({id: "1",name: "timerAlert",message: "hello",activated: false})
+    })
+
+  })
+
+  describe('error path', () => {
+    describe('when injected dependencies arent funcs', () => {
+      it('should throw a type error', () => {
+        expect(core.activateTimerAlertUseCase("getTimerAlertById")(saveTimerAlert)(sendMessage)).to.throw(TypeError)
+        expect(core.activateTimerAlertUseCase(getTimerAlertById)("saveTimerAlert")(sendMessage)).to.throw(TypeError)
+        expect(core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("sendMessage")).to.throw(TypeError)
+      })
+    })
+
+    describe('if timerAlertId is wrong type', () => {
+
+      const activateTimerAlert = core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(sendMessage)
+
+      it('should throw a type error', () => {
+        expect(() => activateTimerAlert(1)).to.throw(TypeError)
+      })
+    })
+
+    describe('when getTimerAlertById throws error', () => {
+      it('should throw error', () => {
+        const getTimerAlertByIdError = () => {throw new Error}
+        expect(() => core.activateTimerAlertUseCase(getTimerAlertByIdError)(saveTimerAlert)(sendMessage)("1").to.throw())
+      })
+    })
+
+    describe('when getTimerAlertById returns nothing', () => {
+      it('should throw an error', () => {
+        const getTimerAlertByIdNull = () => {}
+        expect(() => core.activateTimerAlertUseCase(getTimerAlertByIdNull)(saveTimerAlert)(sendMessage)("1").to.throw())
+      })
     })
 
   })
