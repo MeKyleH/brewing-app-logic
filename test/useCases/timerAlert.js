@@ -125,7 +125,9 @@ describe('updateTimerAlert use case', () => {
     id: "1",
     name: "timerAlert",
     message: "hello",
-    activated: false
+    activated: false,
+    activationTime: 0,
+    timerId: "0"
   }
 
   const getTimerAlertById = timerAlertId => {
@@ -164,7 +166,77 @@ describe('updateTimerAlert use case', () => {
       updatedTimerAlert.message.should.equal("new message")
       updatedTimerAlert.activationTime.should.equal(20)
       updatedTimerAlert.timerId.should.equal("blargh")
-      dummyTimerAlert.should.deep.equal({id: "1",name: "timerAlert",message: "hello",activated: false})
+      dummyTimerAlert.should.deep.equal({id: "1",name: "timerAlert",message: "hello",activated: false, activationTime: 0,timerId: "0"})
+    })
+
+  })
+
+  describe('error path', () => {
+
+    describe('when getTimerAlertById dependency is not a func', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerAlertUseCase("getTimerAlertById")(saveTimerAlert)("1", {message: "new message", activationTime: 20, timerId: "blargh"})).to.throw(TypeError)
+      })
+    })
+
+    describe('when saveTimerAlert dependency is not a func', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)("saveTimerAlert")("1", {message: "new message", activationTime: 20, timerId: "blargh"})).to.throw(TypeError)
+      })
+    })
+
+    describe('when first arg is of wrong type', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(1, {message: "new message", activationTime: 20, timerId: "blargh"})).to.throw(TypeError)
+      })
+    })
+
+    describe('when second arg is of wrong type', () => {
+      
+      describe('not an array or object', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", "new message")).to.throw(TypeError)
+        })
+      })
+
+      describe('when array', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", ["new message"])).to.throw(TypeError)
+        })
+      })
+
+    })
+
+    describe('when attempting to update props that dont currently exist', () => {
+      it('should throw an error', () => {
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {foo: "bar"})).to.throw()
+      })
+    })
+
+    describe('when attempting to update props with wrong types', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: 1})).to.throw(TypeError)
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: true})).to.throw(TypeError)
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: "hello",activationTime: 0,timerId: 1})).to.throw(TypeError)
+      })
+    })
+
+    describe('when attempting to update id prop', () => {
+      it('should throw an error', () => {
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {id: "2"})).to.throw()
+      })
+    })
+
+    describe('when attempting to update activated prop', () => {
+      it('should throw an error', () => {
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {activated: true})).to.throw()
+      })
+    })
+
+    describe('when attempting to update both id and activated', () => {
+      it('should throw an error', () => {
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {id: "2", activated: true})).to.throw()
+      })
     })
 
   })
