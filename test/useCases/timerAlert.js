@@ -1,5 +1,6 @@
 const chai = require('chai')
 const should = chai.should()
+const expect = chai.expect
 const core = require('../../lib')
 
 describe('createTimerAlert use case', () => {
@@ -82,6 +83,34 @@ describe('createTimerAlert use case', () => {
       timerAlert.activated.should.equal(false)
     })
   
+  })
+
+  describe("error path", () => {
+
+    describe("when first arg is of wrong type", () => {
+      it('should trow a type error', () => {
+        expect(() => timerAlertFactory(1, 1000, "test")).to.throw(TypeError)
+      })
+    })
+
+    describe("when second arg is of wrong type", () => {
+      it('should trow a type error', () => {
+        expect(() => timerAlertFactory("1", "1000", "test")).to.throw(TypeError)
+      })
+    })
+
+    describe("when third arg is of wrong type", () => {
+      it('should trow a type error', () => {
+        expect(() => timerAlertFactory("1", 1000, 1)).to.throw(TypeError)
+      })
+    })
+
+    describe("when injected dependency is not a func", () => {
+      it('should throw a type error', () => {
+        expect(() => core.createTimerAlertUseCase("createTimerAlert")("1", 1000, "test")).to.throw(TypeError)
+      })
+    })
+
   })
 })
 
