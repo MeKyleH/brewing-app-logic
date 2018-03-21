@@ -187,7 +187,7 @@ describe("activateTimerAlert use case", () => {
       getTimerAlertId.should.equal("1")
     })
 
-    it('should call saveTimer injected dependency', () => {
+    it('should call saveTimerAlert injected dependency', () => {
       saveTimerCalled.should.equal(true)
     })
 
@@ -207,6 +207,31 @@ describe("activateTimerAlert use case", () => {
       activatedTimerAlert.activated.should.equal(true)
       activatedTimerAlert.should.not.equal(dummyTimerAlert)
       dummyTimerAlert.should.deep.equal({id: "1",name: "timerAlert",message: "hello",activated: false})
+    })
+
+  })
+})
+
+describe('delete timerAlert use case', () => {
+  describe('happy path', () => {
+
+    let deleteTimerAlertCalled = false
+    let deleteTimerAlertId = ""
+
+    const _deleteTimerAlert = timerAlertId => {
+      deleteTimerAlertCalled = true
+      deleteTimerAlertId = timerAlertId
+    }
+
+    const id = "1"
+    core.deleteTimerAlertUseCase(_deleteTimerAlert)(id)
+
+    it('should call deleteTimerAlert injected dependency', () => {
+      deleteTimerAlertCalled.should.equal(true)
+    })
+
+    it('should pass timerId to deleteFunc', () => {
+      deleteTimerAlertId.should.equal(id)
     })
 
   })
