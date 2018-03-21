@@ -253,6 +253,13 @@ describe('updateTimerAlert use case', () => {
       })
     })
 
+    describe('when saveTimerAlert throws an error', () => {
+      it('should throw an error', () => {
+        const saveTimerAlertError = () => {throw new Error}
+        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlertError)("1", {message: "hello"})).to.throw()
+      })
+    })
+
   })
 
 })
@@ -358,19 +365,34 @@ describe("activateTimerAlert use case", () => {
       })
     })
 
+    describe('when saveTimerAlert throws an error', () => {
+      it('should throw an error', () => {
+        const saveTimerAlertError = () => {throw new Error}
+        expect(() => core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlertError)(sendMessage)("1")).to.throw()
+      })
+    })
+
+    describe('when sendMessage throws an error', () => {
+      it('should throw an error', () => {
+        const sendMessageError = () => {throw new Error}
+        expect(() => core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(sendMessageError)("1")).to.throw()
+      })
+    })
+
   })
 })
 
 describe('delete timerAlert use case', () => {
+
+  let deleteTimerAlertCalled = false
+  let deleteTimerAlertId = ""
+
+  const _deleteTimerAlert = timerAlertId => {
+    deleteTimerAlertCalled = true
+    deleteTimerAlertId = timerAlertId
+  }
+
   describe('happy path', () => {
-
-    let deleteTimerAlertCalled = false
-    let deleteTimerAlertId = ""
-
-    const _deleteTimerAlert = timerAlertId => {
-      deleteTimerAlertCalled = true
-      deleteTimerAlertId = timerAlertId
-    }
 
     const id = "1"
     core.deleteTimerAlertUseCase(_deleteTimerAlert)(id)
@@ -381,6 +403,29 @@ describe('delete timerAlert use case', () => {
 
     it('should pass timerId to deleteFunc', () => {
       deleteTimerAlertId.should.equal(id)
+    })
+
+  })
+
+  describe('error path', () => {
+
+    describe('when deleteFunc dependency is not a func', () => {
+      it('should throw a type error', () => {
+        expect(core.deleteTimerAlertUseCase("deleteFunc")).to.throw(TypeError)
+      })
+    })
+
+    describe('when deleteFunc throws an error', () => {
+      it('should throw an error', () => {
+        const deleteFuncError = () => {throw new Error}
+        expect(core.deleteTimerAlertUseCase(deleteFuncError)).to.throw()
+      })
+    })
+
+    describe('when timerAlertId is of wrong type', () => {
+      it('should throw a type error', () => {
+        expect(() => core.deleteTimerAlertUseCase(_deleteTimerAlert)(1)).to.throw(TypeError)
+      })
     })
 
   })
