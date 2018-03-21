@@ -111,6 +111,13 @@ describe('createTimerAlert use case', () => {
       })
     })
 
+    describe('when injected createTimerAlert throws an error', () => {
+      it('should throw an error', () => {
+        createTimerAlertError = () => {throw new Error}
+        expect(core.createTimerAlertUseCase(createTimerAlertError)).to.throw()
+      })
+    })
+
   })
 })
 
