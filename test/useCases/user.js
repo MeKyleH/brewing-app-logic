@@ -31,7 +31,7 @@ describe('user use cases', () => {
       hashPasswordPassedArg = password
       return "hashedPassword"
     }
-    
+
     const userName = "testUser"
     const password = "password"
     const user = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)
@@ -114,6 +114,12 @@ describe('user use cases', () => {
         })
       })
 
+      describe('when hashPassword is not a func', () => {
+        it('should throw a type error', () => {
+          expect(core.createUserUseCase(isUserNameUnique)(createUser)("hashPassword")).to.throw(TypeError)
+        })
+      })
+
       describe('when userName is the wrong type', () => {
         it('should throw a type error', () => {
           expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(1, password)).to.throw(TypeError)
@@ -132,10 +138,24 @@ describe('user use cases', () => {
         })
       })
 
+      describe('when isUserNameUnique fails', () => {
+        it('should throw an error', () => {
+          const badIsUsernameUnique = () => {throw new Error}
+          expect(() => core.createUserUseCase(badIsUsernameUnique)(createUser)(hashPassword)(userName, password)).to.throw()
+        })
+      })
+
       describe('when createUser fails', () => {
         it('should throw an error', () => {
           const badCreateUser = () => {throw new Error}
           expect(() => core.createUserUseCase(isUserNameUnique)(badCreateUser)(hashPassword)(userName, password)).to.throw()
+        })
+      })
+
+      describe('when hashPassword fails', () => {
+        it('should throw an error', () => {
+          const basHashPassword = () => {throw new Error}
+          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(basHashPassword)(userName, password)).to.throw()
         })
       })
 
