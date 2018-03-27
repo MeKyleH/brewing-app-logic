@@ -66,12 +66,6 @@ describe('user entity factory function', () => {
       })
     })
 
-    describe('when hashedPassword is shorter than 8', () => {
-      it('should throw an error', () => {
-        expect(() => core.userEntity(userName, '1234567')).to.throw()
-      })
-    })
-
     describe('when hashedPassword is of wrong type', () => {
       it('should throw a type error', () => {
         expect(() => core.userEntity(userName, 12345678)).to.throw(TypeError)
