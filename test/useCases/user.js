@@ -296,4 +296,121 @@ describe('user use cases', () => {
 
   })
 
+  describe('authenticate user use case', () => {
+
+    const user = {
+      id: "1",
+      userName: "testUser",
+      hashedPassword: "hashedPassword"
+    }
+
+    let findUserByIdCalled = false
+    let findUserByIdArg = ""
+    const findUserById = userId => {
+      findUserByIdCalled = true
+      findUserByIdArg = userId
+      return user
+    }
+
+    let hashPasswordCalled = false
+    let hashPasswordArg = ""
+    const hashPassword = password => {
+      hashPasswordCalled = true
+      hashPasswordArg = password
+      if(password === 'badPassword'){
+        return "badHash"
+      }else{
+        return "hashedPassword"
+      }
+    }
+
+    const userId = "1"
+    const password = "password"
+
+    const authenticatedUser = core.authenticateUserUseCase(findUserById)(hashPassword)(userId, password)
+
+    describe('happy path', () => {
+
+      it('should return a function after passing findUserById', () => {
+        core.authenticateUserUseCase(findUserById).should.be.a('function')
+      })
+
+      it('should return a function after passing hashPassword', () => {
+        core.authenticateUserUseCase(findUserById)(hashPassword).should.be.a("function")
+      })
+
+      it('should call findUserById injected dependency', () => {
+        findUserByIdCalled.should.equal(true)
+      })
+
+      it('should pass userId to findUserById', () => {
+        findUserByIdArg.should.equal(userId)
+      })
+
+      it('should call hashPassword injected dependency', () => {
+        hashPasswordCalled.should.equal(true)
+      })
+
+      it('should pass password arg to hashPassword', () => {
+        hashPasswordArg.should.equal(password)
+      })
+
+      it('should return the user with the matching id', () => {
+        authenticatedUser.should.deep.equal(user)
+      })
+
+    })
+
+    describe('bad password path', () => {
+
+      it('should return an error if the wrong password is given', () => {
+        expect(() => core.authenticateUserUseCase(findUserById)(hashPassword)(userId, "badPassword")).to.throw()
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when findUserById is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.authenticateUserUseCase("badFindUser")).to.throw(TypeError)
+        })
+      })
+
+      describe('when hashPassword is not a func', () => {
+        it('should throw a type error', () => {
+          expect(core.authenticateUserUseCase(findUserById)("badHash")).to.throw(TypeError)
+        })
+      })
+
+      describe('when userId is of wrong type', () => {
+        it('should throw a type error', () => {
+          expect(() => core.authenticateUserUseCase(findUserById)(hashPassword)(1, password)).to.throw(TypeError)
+        })
+      })
+
+      describe('when password is of wrong type', () => {
+        it('should throw a type error', () => {
+          expect(() => core.authenticateUserUseCase(findUserById)(hashPassword)(userId, 1234)).to.throw(TypeError)
+        })
+      })
+
+      describe('when findUserById fails', () => {
+        it('should throw an error', () => {
+          const badFindUser = () => {throw new Error}
+          expect(() => core.authenticateUserUseCase(badFindUser)(hashPassword)(userId, password)).to.throw()
+        })
+      })
+
+      describe('when hashPassword fails', () => {
+        it('should throw an error', () => {
+          const badHashPassword = () => {throw new Error}
+          expect(() => core.authenticateUserUseCase(findUserById)(badHashPassword)(userId, password)).to.throw()
+        })
+      })
+
+    })
+
+  })
+
 })
