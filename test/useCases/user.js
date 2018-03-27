@@ -15,16 +15,47 @@ describe('user use cases', () => {
       createdUser = user
       usernames.push(user.userName)
     }
-    const isUserNameUnique = userName =>
-      !usernames.includes(userName)
+
+    let isUserNameUniqueCalled = false
+    let isUserNameUniqueArg = ""
+    const isUserNameUnique = userName =>{
+      isUserNameUniqueCalled = true
+      isUserNameUniqueArg = userName
+      return !usernames.includes(userName)
+    }
+
+    let hashPasswordCalled = false
+    let hashPasswordPassedArg = ""
+    const hashPassword = password => {
+      hashPasswordCalled = true
+      hashPasswordPassedArg = password
+      return "hashedPassword"
+    }
+    
     const userName = "testUser"
-    const hashedPassword = "hashedPassword"
-    const user = core.createUserUseCase(isUserNameUnique)(createUser)(userName, hashedPassword)
+    const password = "password"
+    const user = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)
 
     describe('happy path', () => {
 
       it('should create a function after createUser is injected', () => {
         core.createUserUseCase(isUserNameUnique)(createUser).should.be.a('function')
+      })
+
+      it('should call isUserNameUnique injected dependency', () => {
+        isUserNameUniqueCalled.should.equal(true)
+      })
+
+      it('should pass userName to isUserNameUnique', () => {
+        isUserNameUniqueArg.should.equal(userName)
+      })
+
+      it('should call hashPassword injected dependency', () => {
+        hashPasswordCalled.should.equal(true)
+      })
+
+      it('should pass password to hashPassword dependency', () => {
+        hashPasswordPassedArg.should.equal(password)
       })
 
       it('should call createUser injected dependency', () => {
@@ -45,7 +76,7 @@ describe('user use cases', () => {
       })
 
       it('should generate unique ids', () => {
-        const user2 = core.createUserUseCase(isUserNameUnique)(createUser)('testUser2', 'password')
+        const user2 = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)('testUser2', 'password')
         user2.id.should.not.equal(user.id)
       })
 
@@ -63,8 +94,8 @@ describe('user use cases', () => {
         user.hashedPassword.should.be.a('string')
       })
 
-      it('should set hashedPassword equal to hashedPassword arg', () => {
-        user.hashedPassword.should.equal(hashedPassword)
+      it('should not have password saved in cleartext', () => {
+        user.hashedPassword.should.not.equal(password)
       })
 
     })
@@ -79,32 +110,32 @@ describe('user use cases', () => {
 
       describe('when createUser is not a func', () => {
         it('should throw a type error', () => {
-          expect(core.createUserUseCase(isUserNameUnique)("createUser")).to.throw(TypeError)
+          expect(core.createUserUseCase(isUserNameUnique)("createUser")(hashPassword)).to.throw(TypeError)
         })
       })
 
       describe('when userName is the wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(1, hashedPassword)).to.throw(TypeError)
+          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(1, password)).to.throw(TypeError)
         })
       })
 
       describe('when userName is not unique', () => {
         it('should throw an error', () => {
-          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(userName, hashedPassword)).to.throw()
+          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)).to.throw()
         })
       })
 
-      describe('when hashedPassword is the wrong type', () => {
+      describe('when password is the wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(userName, 1)).to.throw(TypeError)
+          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, 1)).to.throw(TypeError)
         })
       })
 
       describe('when createUser fails', () => {
         it('should throw an error', () => {
           const badCreateUser = () => {throw new Error}
-          expect(() => core.createUserUseCase(isUserNameUnique)(badCreateUser)(userName, hashedPassword)).to.throw()
+          expect(() => core.createUserUseCase(isUserNameUnique)(badCreateUser)(hashPassword)(userName, password)).to.throw()
         })
       })
 
@@ -117,7 +148,7 @@ describe('user use cases', () => {
     const testUser = {
       id: "1",
       userName: "testUser",
-      hashedPassword: "hashedPassword"
+      password: "password"
     }
 
     let findUserByIdCalled = false
