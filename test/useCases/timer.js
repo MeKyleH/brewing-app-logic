@@ -1,6 +1,7 @@
 const core = require('../../lib')
 const chai = require('chai')
 const should = chai.should()
+const expect = chai.expect
 
 describe('create timer use case', () => {
   describe('happy path', () => {
@@ -24,6 +25,72 @@ describe('create timer use case', () => {
       timer.isRunning.should.equal(false)
     })
   })
+})
+
+describe.only('getTimer use case', () => {
+
+  const testTimer = {
+    id: "1",
+    duration: 1000,
+    remainingDuration: 1000,
+    intervalDuration: 500,
+    isRunning: false
+  }
+
+  let findTimerByIdCalled = false
+  let findTimerByIdArg = ""
+  const findTimerById = timerId => {
+    findTimerByIdCalled = true
+    findTimerByIdArg = timerId
+    return testTimer
+  }
+
+  const timerId = "1"
+  const timer = core.getTimerUseCase(findTimerById)(timerId)
+
+  describe('happy path', () => {
+
+    it('should return a function after taking findTimerById', () => {
+      core.getTimerUseCase(findTimerById).should.be.a('function')
+    })
+
+    it('should call findTimerById', () => {
+      findTimerByIdCalled.should.equal(true)
+    })
+
+    it('should pass timerId arg to findTimerById', () => {
+      findTimerByIdArg.should.equal(timerId)
+    })
+
+    it('should return timer', () => {
+      timer.should.deep.equal(testTimer)
+    })
+
+  })
+
+  describe('error path', () => {
+
+    describe('when findTimerById is not a func', () => {
+      it('should throw a type error', () => {
+        expect(() => core.getTimerUseCase("findTimerById")).to.throw(TypeError)
+      })
+    })
+
+    describe('when timerId is not of type string', () => {
+      it('should throw a type error', () => {
+        expect(() => core.getTimerUseCase(findTimerById)(1)).to.throw(TypeError)
+      })
+    })
+
+    describe('when findTimerById fails', () => {
+      it('should throw an error', () => {
+        const badFindTimerById = () => {throw new Error}
+        expect(() => core.getTimerUseCase(badFindTimerById)(timerId)).to.throw()
+      })
+    })
+
+  })
+
 })
 
 describe('start timer use case', () => {
