@@ -121,7 +121,75 @@ describe('createTimerAlert use case', () => {
   })
 })
 
-describe.only('getTimerAlertsByTimerId use case', () => {
+describe('getTimerAlert use case', () => {
+
+  let findTimerAlertByIdCalled = false
+  let findTimerAlertByIdArg = ""
+
+  const testTimerAlert = {
+    id: "1",
+    name: "timerAlert",
+    message: "hello",
+    activated: false,
+    activationTime: 0,
+    timerId: "0"
+  }
+  
+  const findTimerAlertById = timerAlertId => {
+    findTimerAlertByIdCalled = true
+    findTimerAlertByIdArg = timerAlertId
+    return testTimerAlert
+  }
+
+  const timerAlertId = "1"
+  const timerAlert = core.getTimerAlertUseCase(findTimerAlertById)(timerAlertId)
+
+  describe('happy path', () => {
+
+    it('should return a function after passing findTimerAlertById', () => {
+      core.getTimerAlertUseCase(findTimerAlertById).should.be.a('function')
+    })
+
+    it('should call findTimerAlertById', () => {
+      findTimerAlertByIdCalled.should.equal(true)
+    })
+
+    it('should pass timerAlertId arg to findTimerAlertById', () => {
+      findTimerAlertByIdArg.should.equal(timerAlertId)
+    })
+
+    it('should return timerAlert with matching id', () => {
+      timerAlert.should.deep.equal(testTimerAlert)
+    })
+
+  })
+
+  describe('error path', () => {
+
+    describe('when findTimerAlertById is not a func', () => {
+      it('should throw a type error', () => {
+        expect(() => core.getTimerAlertUseCase("findTimerAlertById")).to.throw(TypeError)
+      })
+    })
+
+    describe('when timerAlertId is not of type string', () => {
+      it('should throw a type error', () => {
+        expect(() => core.getTimerAlertUseCase(findTimerAlertById)(1)).to.throw(TypeError)
+      })
+    })
+
+    describe('when findTimerAlertById fails', () => {
+      it('should throw an error', () => {
+        const badFindTimerAlertById = () => {throw new Error}
+        expect(() => core.getTimerAlertUseCase(badFindTimerAlertById)(timerAlertId)).to.throw()
+      })
+    })
+
+  })
+
+})
+
+describe('getTimerAlertsByTimerId use case', () => {
 
   let timerExistsCalled = false
   let timerExistsArg = ""
