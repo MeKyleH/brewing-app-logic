@@ -413,4 +413,61 @@ describe('user use cases', () => {
 
   })
 
+  describe('delete user use case', () => {
+
+    let deleteUserCalled = false
+    let deleteUserIdArg = ""
+    const deleteUser = userId => {
+      deleteUserCalled = true
+      deleteUserIdArg = userId
+    }
+
+    const userId = "1"
+    const deletedUser = core.deleteUserUseCase(deleteUser)(userId)
+
+    describe('happy path', () => {
+
+      it('should return a function after deleteUser is passed', () => {
+        core.deleteUserUseCase(deleteUser).should.be.a('function')
+      })
+
+      it('should call a delete user injected dependency', () => {
+        deleteUserCalled.should.equal(true)
+      })
+
+      it('should pass userId arg to deleteUser', () => {
+        deleteUserIdArg.should.equal(userId)
+      })
+
+      it('should return null after deletion', () => {
+        should.equal(deletedUser, null)
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when deleteUser is not a func', () => {
+        it('should throw a type error', () => {
+          expect(core.deleteUserUseCase("deleteUser")).to.throw(TypeError)
+        })
+      })
+
+      describe('when userId is not of type string', () => {
+        it('should throw a type error', () => {
+          expect(() => core.deleteUserUseCase(deleteUser)(1)).to.throw(TypeError)
+        })
+      })
+
+      describe('when deleteUser fails', () => {
+        it('should throw an error', () => {
+          const badDeleteUser = () => {throw new Error}
+          expect(() => core.deleteUserUseCase(badDeleteUser)(userId)).to.throw()
+        })
+      })
+
+    })
+
+  })
+
 })
