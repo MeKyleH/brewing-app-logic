@@ -3,7 +3,7 @@ const should = chai.should()
 const expect = chai.expect
 const core = require('../../lib')
 
-describe.only('inventory use cases', () => {
+describe('inventory use cases', () => {
 
   describe('create inventory use case', () => {
 
@@ -85,6 +85,71 @@ describe.only('inventory use cases', () => {
         it('should throw an error', () => {
           const badCreateInventory = () => {throw new Error}
           expect(() => core.createInventoryUseCase(badCreateInventory)(name, userId)).to.throw()
+        })
+      })
+
+    })
+
+  })
+
+  describe.only('getInventory use case', () => {
+
+    const testInventory = {
+      id: "1",
+      name: "testInventory",
+      userId: "1",
+      items: []
+    }
+
+    let findInventoryByIdCalled = false
+    let findInventoryByIdArg = {}
+    const findInventoryById = inventoryId => {
+      findInventoryByIdCalled = true
+      findInventoryByIdArg = inventoryId
+      return testInventory
+    }
+
+    const inventoryId = "1"
+    const inventory = core.getInventoryUseCase(findInventoryById)(inventoryId)
+
+    describe('happy path', () => {
+
+      it('should return a function after receiving findInventoryById', () => {
+        core.getInventoryUseCase(findInventoryById).should.be.a('function')
+      })
+
+      it('should call findInventoryById', () => {
+        findInventoryByIdCalled.should.equal(true)
+      })
+
+      it('should pass inventoryId arg to findInventoryById', () => {
+        findInventoryByIdArg.should.equal(inventoryId)
+      })
+
+      it('should return inventory object', () => {
+        inventory.should.deep.equal(testInventory)
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when findInventoryById is not a function', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getInventoryUseCase("findInventoryById")).to.throw(TypeError)
+        })
+      })
+
+      describe('when inventoryId is not of type string', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getInventoryUseCase(findInventoryById)(1)).to.throw(TypeError)
+        })
+      })
+
+      describe('when findInventoryById fails', () => {
+        it('should throw an error', () => {
+          const badFindInventoryById = () => {throw new Error}
+          expect(() => core.getInventoryUseCase(badFindInventoryById)(inventoryId)).to.throw()
         })
       })
 
