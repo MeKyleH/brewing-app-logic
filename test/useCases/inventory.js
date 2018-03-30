@@ -92,7 +92,7 @@ describe('inventory use cases', () => {
 
   })
 
-  describe.only('getInventory use case', () => {
+  describe('getInventory use case', () => {
 
     const testInventory = {
       id: "1",
