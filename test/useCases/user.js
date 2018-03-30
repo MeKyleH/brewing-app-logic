@@ -163,6 +163,71 @@ describe('user use cases', () => {
 
   })
 
+  describe('getUser use case', () => {
+
+    let findUserByIdCalled = false
+    let findUserByIdArg = ""
+
+    const testUser = {
+      id: "1",
+      userName: "testUser",
+      hashedPassword: "hashedPassword"
+    }
+    
+    const findUserById = userId => {
+      findUserByIdCalled = true
+      findUserByIdArg = userId
+      return testUser
+    }
+
+    const userId = "1"
+    const user = core.getUserUseCase(findUserById)(userId)
+
+    describe('happy path', () => {
+
+      it('should return a function after passing findUserById', () => {
+        core.getUserUseCase(findUserById).should.be.a('function')
+      })
+
+      it('should call findUserById', () => {
+        findUserByIdCalled.should.equal(true)
+      })
+
+      it('should pass userId arg to findUserById', () => {
+        findUserByIdArg.should.equal(userId)
+      })
+
+      it('should return user whose id matches userId', () => {
+        user.should.deep.equal(testUser)
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when findUserById is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getUserUseCase("findUserById")).to.throw(TypeError)
+        })
+      })
+
+      describe('when userId is not of type string', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getUserUseCase(findUserById)(1)).to.throw(TypeError)
+        })
+      })
+
+      describe('when findUserById fails', () => {
+        it('should throw an error', () => {
+          const badFindUserById = () => {throw new Error}
+          expect(() => core.getUserUseCase(badFindUserById)(userId)).to.throw()
+        })
+      })
+
+    })
+
+  })
+
   describe('updateUser use case', () => {
 
     const testUser = {
