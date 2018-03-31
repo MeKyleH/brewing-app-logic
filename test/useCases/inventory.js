@@ -157,4 +157,130 @@ describe('inventory use cases', () => {
 
   })
 
+  describe.only('getInventoriesByUserId use case', () => {
+
+    let userExistsCalled = false
+    let userExistsArg = ""
+    
+    const userExists = userId => {
+      userExistsCalled = true
+      userExistsArg = userId
+      return true
+    }
+
+    let findInventoriesByUserIdCalled = false
+    let findInventoriesByUserIdArg = ""
+
+    const testInventories = [
+      {
+        id: "1",
+        name: "testInventory",
+        userId: "1",
+        items: []
+      },
+      {
+        id: "2",
+        name: "testInventory2",
+        userId: "1",
+        items: []
+      }
+    ]
+    
+    const findInventoriesByUserId = userId => {
+      findInventoriesByUserIdCalled = true
+      findInventoriesByUserIdArg = userId
+      return testInventories
+    }
+
+    const userId = "1"
+    const inventories = core.getInventoriesByUserIdUseCase(userExists)(findInventoriesByUserId)(userId)
+
+    describe('happy path', () => {
+
+      it('should return a function after passing userExists', () => {
+        core.getInventoriesByUserIdUseCase(userExists).should.be.a('function')
+      })
+
+      it('should return a function after passing findInventoriesByUserId', () => {
+        core.getInventoriesByUserIdUseCase(userExists)(findInventoriesByUserId).should.be.a('function')
+      })
+
+      it('should call userExists', () => {
+        userExistsCalled.should.equal(true)
+      })
+
+      it('should pass userId arg to userExists', () => {
+        userExistsArg.should.equal(userId)
+      })
+
+      it('should return an empty array if userExists is false', () => {
+        const userExistsFalse = () => false
+        const emptyArray = core.getInventoriesByUserIdUseCase(userExistsFalse)(findInventoriesByUserId)(userId)
+        emptyArray.should.be.an('array')
+        emptyArray.length.should.equal(0)
+      })
+
+      describe('when userExists is true', () => {
+
+        it('should call findInventoriesByUserId', () => {
+          findInventoriesByUserIdCalled.should.equal(true)
+        })
+
+        it('should pass userId arg to findInventoriesByUserId', () => {
+          findInventoriesByUserIdArg.should.equal(userId)
+        })
+
+        it('should return array of inventories', () => {
+          inventories.should.deep.equal(testInventories)
+        })
+
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when userExists is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getInventoriesByUserIdUseCase("userExists")).to.throw(TypeError)
+        })
+      })
+
+      describe('when findInventoriesByUserId is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getInventoriesByUserIdUseCase(userExists)("findInventoriesByUserId")).to.throw(TypeError)
+        })
+      })
+
+      describe('when userId is not of type string', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getInventoriesByUserIdUseCase(userExists)(findInventoriesByUserId)(1)).to.throw(TypeError)
+        })
+      })
+
+      describe('when userExists fails', () => {
+        it('should throw an error', () => {
+          const badUserExists = () => {throw new Error}
+          expect(() => core.getInventoriesByUserIdUseCase(badUserExists)(findInventoriesByUserId)(userId)).to.throw()
+        })
+      })
+
+      describe('when findInventoriesByUserId fails', () => {
+        it('should throw an error', () => {
+          const badFindInventoriesByUserId = () => {throw new Error}
+          expect(() => core.getInventoriesByUserIdUseCase(userExists)(badFindInventoriesByUserId)(userId)).to.throw()
+        })
+      })
+
+      describe('when inventories is not an array', () => {
+        it('should throw a type error', () => {
+          const badFindInventoriesByUserId = () => ({})
+          expect(() => core.getInventoriesByUserIdUseCase(userExists)(badFindInventoriesByUserId)(userId)).to.throw(TypeError)
+        })
+      })
+
+    })
+
+  })
+
 })
