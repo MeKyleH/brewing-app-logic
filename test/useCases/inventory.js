@@ -283,4 +283,153 @@ describe('inventory use cases', () => {
 
   })
 
+  describe.only('update inventory use case', () => {
+
+    let findInventoryByIdCalled = false
+    let findInventoryByIdArg = ""
+
+    const inventory =  {
+      id: "1",
+      name: "testInventory",
+      userId: "1",
+      items: []
+    }
+    
+    const findInventoryById = inventoryId => {
+      findInventoryByIdCalled = true
+      findInventoryByIdArg = inventoryId
+      return inventory
+    }
+    
+    let saveInventoryCalled = false
+    let saveInventoryArg = {}
+
+    const saveInventory = updatedInventory => {
+      saveInventoryCalled = true
+      saveInventoryArg = updatedInventory
+    }
+
+    const inventoryId = "1"
+    const updatePropsObj = {name: "otherInventory"}
+    const updatedInventory = core.updateInventoryUseCase(findInventoryById)(saveInventory)(inventoryId, updatePropsObj)
+
+    describe('happy path', () => {
+
+      it('should return a function after receiving findInventoryById', () => {
+        core.updateInventoryUseCase(findInventoryById).should.be.a('function')
+      })
+
+      it('should return a function after saveInventory is passed', () => {
+        core.updateInventoryUseCase(findInventoryById)(saveInventory).should.be.a('function')
+      })
+
+      it('should call findInventoryById', () => {
+        findInventoryByIdCalled.should.equal(true)
+      })
+
+      it('should pass inventoryId arg to findInventoryById', () => {
+        findInventoryByIdArg.should.equal(inventoryId)
+      })
+
+      it('should return a copy of inventory with updateProps arg merged', () => {
+        updatedInventory.should.not.deep.equal(inventory)
+        const copy = Object.assign({}, inventory, updatePropsObj)
+        updatedInventory.should.deep.equal(copy)
+      })
+
+      it('should call saveInventory', () => {
+        saveInventoryCalled.should.equal(true)
+      })
+
+      it('should pass updatedInventory to saveInventory', () => {
+        saveInventoryArg.should.deep.equal(updatedInventory)
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when findInventoryById is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateInventoryUseCase('findInventoryById')).to.throw(TypeError)
+        })
+      })
+
+      describe('when saveInventory is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateInventoryUseCase(findInventoryById)('saveInventory')).to.throw(TypeError)
+        })
+      })
+
+      describe('when inventoryId is not of type string', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateInventoryUseCase(findInventoryById)(saveInventory)(1, updatePropsObj)).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj is not of type object', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateInventoryUseCase(findInventoryById)(saveInventory)(inventoryId, "")).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj is of type array', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateInventoryUseCase(findInventoryById)(saveInventory)(inventoryId, [])).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj tries to update id', () => {
+        it('should throw an error', () => {
+          const badUpdatePropsObj = {id: "2"}
+          expect(() => core.updateInventoryUseCase(findInventoryById)(saveInventory)(inventoryId, badUpdatePropsObj)).to.throw()
+        })
+      })
+
+      describe('when updatePropsObj has keys that are not on inventory', () => {
+        it('should throw an error', () => {
+          const badUpdatePropsObj = {foo: "bar"}
+          expect(() => core.updateInventoryUseCase(findInventoryById)(saveInventory)(inventoryId, badUpdatePropsObj)).to.throw()
+        })
+      })
+
+      describe('when values on updatePropsObj are not of same type as inventory', () => {
+        it('should throw a type error', () => {
+          const badUpdatePropsObj = {name: 1}
+          expect(() => core.updateInventoryUseCase(findInventoryById)(saveInventory)(inventoryId, badUpdatePropsObj)).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj.items is not of type array', () => {
+        it('should throw a type error', () => {
+          const badUpdatePropsObj = {items: {}}
+          expect(() => core.updateInventoryUseCase(findInventoryById)(saveInventory)(inventoryId, badUpdatePropsObj)).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj.items children are not objects', () => {
+        it('should throw a type error', () => {
+          const badUpdatePropsObj = {items: [1]}
+          expect(() => core.updateInventoryUseCase(findInventoryById)(saveInventory)(inventoryId, badUpdatePropsObj)).to.throw(TypeError)
+        })
+      })
+
+      describe('when findInventoryById fails', () => {
+        it('should throw an error', () => {
+          const badFindInventoryById = () => {throw new Error}
+          expect(() => core.updateInventoryUseCase(badFindInventoryById)(saveInventory)(inventoryId, updatePropsObj)).to.throw()
+        })
+      })
+
+      describe('when saveInventory fails', () => {
+        it('should throw an error', () => {
+          const badSaveInventory = () => {throw new Error}
+          expect(() => core.updateInventoryUseCase(findInventoryById)(badSaveInventory)(inventoryId, updatePropsObj)).to.throw()
+        })
+      })
+
+    })
+
+  })
+
 })
