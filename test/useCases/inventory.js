@@ -157,7 +157,7 @@ describe('inventory use cases', () => {
 
   })
 
-  describe.only('getInventoriesByUserId use case', () => {
+  describe('getInventoriesByUserId use case', () => {
 
     let userExistsCalled = false
     let userExistsArg = ""
