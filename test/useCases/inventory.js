@@ -283,7 +283,7 @@ describe('inventory use cases', () => {
 
   })
 
-  describe.only('update inventory use case', () => {
+  describe('update inventory use case', () => {
 
     let findInventoryByIdCalled = false
     let findInventoryByIdArg = ""
@@ -425,6 +425,64 @@ describe('inventory use cases', () => {
         it('should throw an error', () => {
           const badSaveInventory = () => {throw new Error}
           expect(() => core.updateInventoryUseCase(findInventoryById)(badSaveInventory)(inventoryId, updatePropsObj)).to.throw()
+        })
+      })
+
+    })
+
+  })
+
+  describe('delete inventory use case', () => {
+
+    let deleteInventoryCalled = false
+    let deleteInventoryArg = ""
+
+    const deleteInventory = inventoryId => {
+      deleteInventoryCalled = true
+      deleteInventoryArg = inventoryId
+    }
+
+    const inventoryId = "1"
+    const deletedInventory = core.deleteInventoryUseCase(deleteInventory)(inventoryId)
+
+    describe('happy path', () => {
+
+      it('should return a function after receiving deleteInventory', () => {
+        core.deleteInventoryUseCase(deleteInventory).should.be.a('function')
+      })
+
+      it('should call deleteInventory', () => {
+        deleteInventoryCalled.should.equal(true)
+      })
+
+      it('should pass inventoryId arg to deleteInventory', () => {
+        deleteInventoryArg.should.equal(inventoryId)
+      })
+
+      it('should return null after deleting', () => {
+        should.equal(deletedInventory, null)
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when deleteInventory is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.deleteInventoryUseCase('deleteInventory')).to.throw(TypeError)
+        })
+      })
+
+      describe('when inventoryId is not a string', () => {
+        it('should throw a type error', () => {
+          expect(() => core.deleteInventoryUseCase(deleteInventory)(1)).to.throw(TypeError)
+        })
+      })
+
+      describe("when deleteInventory fails", () => {
+        it('should throw an error', () => {
+          const badDeleteInventory = () => {throw new Error}
+          expect(() => core.deleteInventoryUseCase(badDeleteInventory)(inventoryId)).to.throw()
         })
       })
 
