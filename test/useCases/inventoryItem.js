@@ -288,7 +288,12 @@ describe.only('inventory item use cases', () => {
       })
 
       it('should return an inventoryItem whose props are updated to match updatePropsObj', () => {
-        updatedInventoryItem.should.deep.equal(Object.assign({}, inventoryItem, updatePropsObj))
+        const updatedInventoryItemNoDate = Object.assign({}, updatedInventoryItem, {updatedAt: null})
+        updatedInventoryItemNoDate.should.deep.equal(Object.assign({}, inventoryItem, Object.assign({}, updatePropsObj, {updatedAt: null})))
+      })
+
+      it('should update updatedAt date', () => {
+        updatedInventoryItem.updatedAt.should.not.equal(inventoryItem.updatedAt)
       })
 
     })
@@ -380,7 +385,8 @@ describe.only('inventory item use cases', () => {
       it('should not throw an error', () => {
         const nullUpdateObj = {lastReorderDate: null, deliveryDate: null}
         const updatePropsObj2 = curriedUpdateInventoryItemUseCase(id, nullUpdateObj)
-        updatePropsObj2.should.deep.equal(Object.assign({}, inventoryItem, nullUpdateObj))
+        should.equal(null, updatePropsObj2.lastReorderDate)
+        should.equal(null, updatePropsObj2.deliveryDate)
       })
 
     })
