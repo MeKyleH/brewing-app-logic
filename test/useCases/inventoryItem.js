@@ -387,4 +387,61 @@ describe.only('inventory item use cases', () => {
 
   })
 
+  describe('core.deleteInventoryItemUseCase', () => {
+
+    let deleteInventoryItemCalled = false
+    let deleteInventoryItemArg = ""
+    const deleteInventoryItem = id => {
+      deleteInventoryItemCalled = true
+      deleteInventoryItemArg = id
+    }
+
+    const id = "1"
+    const deletedInventoryItem = core.deleteInventoryItemUseCase(deleteInventoryItem)(id)
+
+    describe('happy path', () => {
+
+      it('should reutrn a function after accepting deleteInventoryItem arg', () => {
+        core.deleteInventoryItemUseCase(deleteInventoryItem).should.be.a('function')
+      })
+
+      it('should call deleteInventoryItem', () => {
+        deleteInventoryItemCalled.should.equal(true)
+      })
+
+      it('should pass inventoryItemId to deleteInventoryItem', () => {
+        deleteInventoryItemArg.should.equal(id)
+      })
+
+      it('should return null', () => {
+        should.equal(null, deletedInventoryItem)
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when deleteInventoryItem is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.deleteInventoryItemUseCase("deleteInventoryItem")).to.throw(TypeError)
+        })
+      })
+
+      describe('when id is not of type string', () => {
+        it('should throw a type error', () => {
+          expect(() => core.deleteInventoryItemUseCase(deleteInventoryItem)(1)).to.throw(TypeError)
+        })
+      })
+
+      describe('when deleteInventoryItem fails', () => {
+        it('should throw an error', () => {
+          const badDeleteInventoryItem = () => {throw new Error}
+          expect(() => core.deleteInventoryItemUseCase(badDeleteInventoryItem)(id)).to.throw()
+        })
+      })
+
+    })
+
+  })
+
 })
