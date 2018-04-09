@@ -387,7 +387,78 @@ describe.only('inventory item use cases', () => {
 
   })
 
-  describe('core.deleteInventoryItemUseCase', () => {
+  describe('core.getInventoryItemsByInventoryIdUseCase', () => {
+
+    const inventoryItems = [
+      {id: "1", inventoryId: "1"},
+      {id: "2", inventoryId: "2"},
+      {id: "3", inventoryId: "1"}
+    ]
+
+    let findInventoryItemsByInventoryIdCalled = false
+    let findInventoryItemsByInventoryIdArg = ""
+    const findInventoryItemsByInventoryId = inventoryId => {
+      findInventoryItemsByInventoryIdCalled = true
+      findInventoryItemsByInventoryIdArg = inventoryId
+      return inventoryItems.filter(item => item.inventoryId === inventoryId)
+    }
+
+    const inventoryId = "1"
+    const foundInventoryItems = core.getInventoryItemsByInventoryIdUseCase(findInventoryItemsByInventoryId)(inventoryId)
+
+    describe('happy path', () => {
+
+      it('should return a function after accepting findInventoryItemsByInventoryId arg', () => {
+        core.getInventoryItemsByInventoryIdUseCase(findInventoryItemsByInventoryId).should.be.a('function')
+      })
+
+      it('should call findInventoryItemsByInventoryId', () => {
+        findInventoryItemsByInventoryIdCalled.should.equal(true)
+      })
+
+      it('should pass inventoryId to findInventoryItemsByInventoryId', () => {
+        findInventoryItemsByInventoryIdArg.should.equal(inventoryId)
+      })
+
+      it('should reutrn an array of inventoryItems with inventoryId equal to id arg', () => {
+        foundInventoryItems.should.deep.equal(inventoryItems.filter(item => item.inventoryId === inventoryId))
+      })
+
+    })
+
+    describe('error path', () => {
+
+      describe('when findInventoryItemsByInventoryId is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getInventoryItemsByInventoryIdUseCase("findInventoryItemsByInventoryId")).to.throw(TypeError)
+        })
+      })
+
+      describe('when inventoryId is not of type string', () => {
+        it('should throw a type error', () => {
+          expect(() => core.getInventoryItemsByInventoryIdUseCase(findInventoryItemsByInventoryId)(1)).to.throw(TypeError)
+        })
+      })
+
+      describe('when findInventoryItemsByInventoryId fails', () => {
+        it('should throw an error', () => {
+          const badFindInventoryItemsByInventoryId = () => {throw new Error}
+          expect(() => core.getInventoryItemsByInventoryIdUseCase(badFindInventoryItemsByInventoryId)(inventoryId)).to.throw()
+        })
+      })
+
+      describe('when findInventoryItemsByInventoryId does not return an array', () => {
+        it('should throw an error', () => {
+          const badFindInventoryItemsByInventoryId = () => {return {}}
+          expect(() => core.getInventoryItemsByInventoryIdUseCase(badFindInventoryItemsByInventoryId)(inventoryId)).to.throw()
+        })
+      })
+
+    })
+
+  })
+
+  describe('deleteInventoryItemUseCase', () => {
 
     let deleteInventoryItemCalled = false
     let deleteInventoryItemArg = ""
