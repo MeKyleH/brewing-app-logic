@@ -219,4 +219,172 @@ describe.only('inventory item use cases', () => {
 
   })
 
+  describe('core.updateInventoryItemUseCase', () => {
+
+    const inventoryItem = {
+      id: "1",
+      inventoryId: "1",
+      object: {
+        name: "Test Object"
+      },
+      quantityUnit: "lbs",
+      currentQuantity: 2,
+      reorderQuantity: 10,
+      reorderThreshold: 1,
+      costUnit: "USD",
+      unitCost: 10,
+      reorderCost: 100,
+      lastReorderDate: new Date("11/2/17"),
+      deliveryDate: new Date("1/2/13"),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+
+    let findInventoryItemByIdCalled = false
+    let findInventoryItemByIdArg = ""
+    const findInventoryItemById = id => {
+      findInventoryItemByIdCalled = true
+      findInventoryItemByIdArg = id
+      return inventoryItem
+    }
+
+    let saveInventoryItemCalled = false
+    let saveInventoryItemArg = {}
+    const saveInventoryItem = inventoryItem => {
+      saveInventoryItemCalled = true
+      saveInventoryItemArg = inventoryItem
+    }
+
+    const id = "1"
+    const updatePropsObj = {
+      currentQuantity: 100
+    }
+    const updatedInventoryItem = core.updateInventoryItemUseCase(findInventoryItemById)(saveInventoryItem)(id, updatePropsObj)
+
+    describe('happy path', () => {
+
+      it('should return a function after accepting findInventoryItemById arg', () => {
+        core.updateInventoryItemUseCase(findInventoryItemById).should.be.a('function')
+      })
+
+      it('should return a function after accepting saveInventoryItem arg', () => {
+        core.updateInventoryItemUseCase(findInventoryItemById)(saveInventoryItem).should.be.a('function')
+      })
+
+      it('should call saveInventoryItem', () => {
+        saveInventoryItemCalled.should.equal(true)
+      })
+
+      it('should pass updatedInventoryItem to saveInventoryItem', () => {
+        saveInventoryItemArg.should.deep.equal(updatedInventoryItem)
+      })
+
+      it('should call findInventoryItemById', () => {
+        findInventoryItemByIdCalled.should.equal(true)
+      })
+
+      it('should pass id arg to findInventoryItemById', () => {
+        findInventoryItemByIdArg.should.equal(id)
+      })
+
+      it('should return an inventoryItem whose props are updated to match updatePropsObj', () => {
+        updatedInventoryItem.should.deep.equal(Object.assign({}, inventoryItem, updatePropsObj))
+      })
+
+    })
+
+    describe('error path', () => {
+
+      const curriedUpdateInventoryItemUseCase = core.updateInventoryItemUseCase(findInventoryItemById)(saveInventoryItem)
+
+      describe('when findInventoryItemById is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateInventoryItemUseCase("findInventoryItemById")).to.throw(TypeError)
+        })
+      })
+
+      describe('when saveInventoryItem is not a func', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateInventoryItemUseCase(findInventoryItemById)("saveInventoryItem")).to.throw(TypeError)
+        })
+      })
+
+      describe('when id is not of type string', () => {
+        it('should throw a type error', () => {
+          expect(() => curriedUpdateInventoryItemUseCase(1)).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj is not of type object', () => {
+        it('should throw a type error', () => {
+          expect(() => curriedUpdateInventoryItemUseCase(id, "updatePropsObj")).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj is an array', () => {
+        it('should throw a type error', () => {
+          expect(() => curriedUpdateInventoryItemUseCase(id, [])).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj tries to update id', () => {
+        it('should throw an error', () => {
+          expect(() => curriedUpdateInventoryItemUseCase(id, {id: 1})).to.throw()
+        })
+      })
+
+      describe('when findInventoryItemById fails', () => {
+        it('should throw an error', () => {
+          const badFindInventoryItemById = () => {throw new Error}
+          expect(() => core.updateInventoryItemUseCase(badFindInventoryItemById)(saveInventoryItem)(id, updatePropsObj)).to.throw()
+        })
+      })
+
+      describe('when updatePropsObj tries to update property that doesnt exist', () => {
+        it('should throw an error', () => {
+          expect(() => curriedUpdateInventoryItemUseCase(id, {foo: "bar"})).to.throw()
+        })
+      })
+
+      describe('when updatePropsObj tries to update property with value not of same type', () => {
+        it('should throw a type error', () => {
+          expect(() => curriedUpdateInventoryItemUseCase(id, {inventoryId: 1})).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj ties to update object prop with an array', () => {
+        it('should throw a type error', () => {
+          expect(() => curriedUpdateInventoryItemUseCase(id, {object: []})).to.throw(TypeError)
+        })
+      })
+
+      describe('when updatePropsObj tries to update object prop with null', () => {
+        it('should throw a type error', () => {
+          expect(() => curriedUpdateInventoryItemUseCase(id, {object: null})).to.throw(TypeError)
+        })
+      })
+
+      describe('when saveInventoryItem fails', () => {
+        it('should throw an error', () => {
+          const badSaveInventoryItem = () => {throw new Error}
+          expect(() => core.updateInventoryItemUseCase(findInventoryItemById)(badSaveInventoryItem)(id, updatePropsObj)).to.throw()
+        })
+      })
+
+    })
+
+    describe('when trying to set lastReorderDate and deliveryDate to null', () => {
+      
+      const curriedUpdateInventoryItemUseCase = core.updateInventoryItemUseCase(findInventoryItemById)(saveInventoryItem)
+
+      it('should not throw an error', () => {
+        const nullUpdateObj = {lastReorderDate: null, deliveryDate: null}
+        const updatePropsObj2 = curriedUpdateInventoryItemUseCase(id, nullUpdateObj)
+        updatePropsObj2.should.deep.equal(Object.assign({}, inventoryItem, nullUpdateObj))
+      })
+
+    })
+
+  })
+
 })
