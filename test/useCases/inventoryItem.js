@@ -31,12 +31,23 @@ describe('inventory item use cases', () => {
       createInventoryItemArg = inventoryItem
     }
 
-    const createdItem = core.createInventoryItemUseCase(createInventoryItem)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)
+    let addToInventoryCalled = false
+    let addToInventoryArg = {}
+    const addToInventory = item => {
+      addToInventoryCalled = true
+      addToInventoryArg = item
+    }
+
+    const createdItem = core.createInventoryItemUseCase(createInventoryItem)(addToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)
 
     describe('happy path', () => {
 
       it('should return a function after accepting the createInventoryItem arg', () => {
         core.createInventoryItemUseCase(createInventoryItem).should.be.a('function')
+      })
+
+      it('should return a function after accepting the addToInventory function', () => {
+        core.createInventoryItemUseCase(createInventoryItem)(addToInventory).should.be.a('function')
       })
 
       it('should call createInventoryItem function', () => {
@@ -45,6 +56,14 @@ describe('inventory item use cases', () => {
 
       it('should pass inventoryItem entity to createInventoryItem', () => {
         createInventoryItemArg.should.deep.equal(createdItem)
+      })
+
+      it('should call addToInventory function', () => {
+        addToInventoryCalled.should.equal(true)
+      })
+
+      it('should pass inventoryItem to addToInventory', () => {
+        addToInventoryArg.should.equal(createdItem)
       })
 
       it('should have inventoryId prop equal to inventoryId arg', () => {
@@ -117,7 +136,14 @@ describe('inventory item use cases', () => {
       describe('when createInventoryItem fails', () => {
         it('should throw an error', () => {
           const badCreateInventoryItem = () => {throw new Error}
-          expect(() => core.createInventoryItemUseCase(badCreateInventoryItem)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)).to.throw()
+          expect(() => core.createInventoryItemUseCase(badCreateInventoryItem)(addToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)).to.throw()
+        })
+      })
+
+      describe('when addToInventory fails', () => {
+        it('should throw an error', () => {
+          const badAddToInventory = () => {throw new Error}
+          expect(() => core.createInventoryItemUseCase(createInventoryItem)(badAddToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)).to.throw()
         })
       })
 

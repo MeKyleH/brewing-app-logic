@@ -332,7 +332,7 @@ describe('reset timer use case', () => {
   })
 })
 
-describe.only('delete timer use case', () => {
+describe('delete timer use case', () => {
 
   let deleteTimerCalled = false
   let deleteTimerArg = ""
