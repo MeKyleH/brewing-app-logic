@@ -3,7 +3,7 @@ const should = chai.should()
 const expect = chai.expect
 const core = require('../../lib')
 
-describe.only('inventory item use cases', () => {
+describe('inventory item use cases', () => {
 
   describe('createInventoryItemUseCase', () => {
 
