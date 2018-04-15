@@ -5,7 +5,7 @@ This is the core business logic for a brewing app that I am building. It is buil
 
 ## Installation
 
-`npm intall git+ssh://git@github.com:severnsc/brewing-app-logic.git`
+`npm install git+ssh://git@github.com:severnsc/brewing-app-logic.git`
 
 ## Usage
 
@@ -418,7 +418,7 @@ const timerAdapter = require('timer-adapter')
 const timer = core.getTimerUseCase(timerAdapter.findTimerById)("1")
 ```
 
-#### Get Timer By User Id
+#### Get Timers By User Id
 **Description:** Passes `userId` to `userExists` which returns a boolean. If `false` returns an empty array. If `true` returns an array of timers whose `userId` property equals the `userId` argument.
 
 **Arguments:**
@@ -431,7 +431,7 @@ const timer = core.getTimerUseCase(timerAdapter.findTimerById)("1")
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const timer = core.getTimerByUserIdUseCase(userAdapter.userExists)(timerAdapter.findTimersByUserId)("1")
+const timer = core.getTimersByUserIdUseCase(userAdapter.userExists)(timerAdapter.findTimersByUserId)("1")
 ```
 
 #### Start Timer
