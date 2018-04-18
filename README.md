@@ -665,12 +665,12 @@ const updatedUser = core.updateUserUseCase(userAdapter.findUserById)(userAdapter
 ```
 
 #### Authenticate User
-**Description:** Passes `userId` to `findUserById` which returns a user entity. Passes `password` to `hashPassword` which returns a hash. Compares the hash to the user entity's `hashedPassword` and returns the user if equal.
+**Description:** Passes `userName` to `findUserByUsername` which returns a user entity. Passes `password` to `hashPassword` which returns a hash. Compares the hash to the user entity's `hashedPassword` and returns the user if equal.
 
 **Arguments:**
-- findUserById: Function
+- findUserByUsername: Function
 - hashPassword: Function
-- id: String
+- userName: String
 - password: String
 
 **Usage:**
@@ -678,7 +678,7 @@ const updatedUser = core.updateUserUseCase(userAdapter.findUserById)(userAdapter
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const authenticatedUser = core.authenticateUserUseCase(userAdapter.findUserById)(userAdapter.hashPassword)("1", "password")
+const authenticatedUser = core.authenticateUserUseCase(userAdapter.findUserByUsername)(userAdapter.hashPassword)("1", "password")
 ```
 
 #### Delete User
