@@ -514,7 +514,7 @@ const resetTimer = core.resetTimerUseCase(timerAdapter.getTimerById)(timerAdapte
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const updatedTimer = core.updateTimerUseCase(timerAdapter.findTimerById)(saveTimer)("1", {duration: 5000})
+const updatedTimer = core.updateTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1", {duration: 5000})
 ```
 
 #### Delete Timer
