@@ -332,6 +332,162 @@ describe('reset timer use case', () => {
   })
 })
 
+describe('update timer use case', () => {
+
+  const timer = {
+    id: "1",
+    duration: 1000,
+    remainingDuration: 1000,
+    intervalDuration: 500,
+    isRunning: false
+  }
+
+  const updatePropsObj = {intervalDuration: 200}
+
+  let findTimerByIdCalled = false
+  let findTimerByIdArg = ""
+  const findTimerById = id => {
+    findTimerByIdCalled = true
+    findTimerByIdArg = id
+    return timer
+  }
+
+  let saveTimerCalled = false
+  let saveTimerArg = {}
+  const saveTimer = timer => {
+    saveTimerCalled = true
+    saveTimerArg = timer
+  }
+
+  const id = "1"
+  const updatedTimer = core.updateTimerUseCase(findTimerById)(saveTimer)(id, updatePropsObj)
+
+  describe('happy path', () => {
+
+    it('should return a function after receiving findTimerById', () => {
+      core.updateTimerUseCase(findTimerById).should.be.a('function')
+    })
+
+    it('should call findTimerById', () => {
+      findTimerByIdCalled.should.equal(true)
+    })
+
+    it('should pass id to findTimerById', () => {
+      findTimerByIdArg.should.equal(id)
+    })
+
+    it('should return a function after receiving saveTimer', () => {
+      core.updateTimerUseCase(findTimerById)(saveTimer).should.be.a('function')
+    })
+
+    it('should call saveTimer', () => {
+      saveTimerCalled.should.equal(true)
+    })
+
+    it('should pass updatedTimer to saveTimer', () => {
+      saveTimerArg.should.deep.equal(updatedTimer)
+    })
+
+    it('should return a timer with the updatePropsObj merged in', () => {
+      updatedTimer.should.deep.equal(Object.assign({}, timer, updatePropsObj))
+    })
+
+  })
+
+  describe('error path', () => {
+
+    const updateTimerUseCaseWithDeps = core.updateTimerUseCase(findTimerById)(saveTimer)
+
+    describe('when findTimerById is not a func', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerUseCase('findTimerById')).to.throw(TypeError)
+      })
+    })
+
+    describe('when saveTimer is not a func', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerUseCase(findTimerById)('saveTimer')).to.throw(TypeError)
+      })
+    })
+
+    describe('when id is not a string', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerUseCaseWithDeps(1, updatePropsObj)).to.throw(TypeError)
+      })
+    })
+
+    describe('when updatePropsObj is not an object', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerUseCaseWithDeps(id, "updatePropsObj")).to.throw(TypeError)
+      })
+    })
+
+    describe('when updatePropsObj is an array', () => {
+      it('should throw a type error', () => {
+        expect(() => core.updateTimerUseCaseWithDeps(id, [updatePropsObj])).to.throw(TypeError)
+      })
+    })
+
+    describe('when findTimerById fails', () => {
+      it('should throw an error', () => {
+        const badFindTimerById = () => {throw new Error}
+        expect(() => core.updateTimerUseCase(badFindTimerById)(saveTimer)(id, updatePropsObj)).to.throw()
+      })
+    })
+
+    describe('when updatePropsObj has id key', () => {
+      it('should throw an error', () => {
+        const badUpdatePropsObj = {id: "1"}
+        expect(() => core.updateTimerUseCaseWithDeps(id, badUpdatePropsObj)).to.throw()
+      })
+    })
+
+    describe('when updatePropsObj has remainingDuration key', () => {
+      it('should throw an error', () => {
+        const badUpdatePropsObj = {remainingDuration: 1}
+        expect(() => core.updateTimerUseCaseWithDeps(id, badUpdatePropsObj)).to.throw()
+      })
+    })
+
+    describe('when updatePropsObj has isRunning key', () => {
+      it('should throw an error', () => {
+        const badUpdatePropsObj = {isRunning: true}
+        expect(() => core.updateTimerUseCaseWithDeps(id, badUpdatePropsObj)).to.throw()
+      })
+    })
+
+    describe('when updatePropsObj has userId key', () => {
+      it('should throw an error', () => {
+        const badUpdatePropsObj = {userId: "1"}
+        expect(() => core.updateTimerUseCaseWithDeps(id, badUpdatePropsObj)).to.throw()
+      })
+    })
+
+    describe('when updatePropsObj has key that doesnt exist on timer', () => {
+      it('should throw an error', () => {
+        const badUpdatePropsObj = {foo: "bar"}
+        expect(() => core.updateTimerUseCaseWithDeps(id, badUpdatePropsObj)).to.throw()
+      })
+    })
+
+    describe('when updatePropsObj has value that is of different type than value for corresponding key on timer', () => {
+      it('should throw a type error', () => {
+        const badUpdatePropsObj = {duration: {}}
+        expect(() => core.updateTimerUseCaseWithDeps(id, badUpdatePropsObj)).to.throw(TypeError)
+      })
+    })
+
+    describe('when saveTimer fails', () => {
+      it('should throw an error', () => {
+        const badSaveTimer = () => {throw new Error}
+        expect(() => core.updateTimerUseCase(findTimerById)(badSaveTimer)(id, updatePropsObj)).to.throw()
+      })
+    })
+
+  })
+
+})
+
 describe('delete timer use case', () => {
 
   let deleteTimerCalled = false

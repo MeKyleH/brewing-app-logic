@@ -8,7 +8,7 @@ This is the core business logic for a brewing app that I am building. It is buil
 `npm install git+ssh://git@github.com:severnsc/brewing-app-logic.git`
 
 ## Todo
-- add `updateTimer` useCase
+- prevent editing of userId property for items 
 
 ## Usage
 
@@ -498,6 +498,23 @@ const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
 const resetTimer = core.resetTimerUseCase(timerAdapter.getTimerById)(timerAdapter.saveTimer)("1")
+```
+
+#### Update Timer
+**Description:** Passes the `timerId` to `findTimerById` and returns `timer`. Updates by merging `updatePropsObj` into the timer and passes `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
+
+**Arguments:**
+- findTimerById: Function
+- saveTimer: Function
+- id: String
+- updatePropsObj: Object
+
+**Usage:**
+```javascript
+const core = rquire('brewing-app-logic')
+const timerAdapter = require('timer-adapter')
+
+const updatedTimer = core.updateTimerUseCase(timerAdapter.findTimerById)(saveTimer)("1", {duration: 5000})
 ```
 
 #### Delete Timer
