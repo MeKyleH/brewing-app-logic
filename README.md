@@ -7,6 +7,9 @@ This is the core business logic for a brewing app that I am building. It is buil
 
 `npm install git+ssh://git@github.com:severnsc/brewing-app-logic.git`
 
+## Todo
+- add `updateTimer` useCase
+
 ## Usage
 
 The functions in the library are curryable and accept dependencies for things like the persistence layer. The recommended way to use this library is to have a compose file at the top level of your project structure where you inject all of your dependencies into the functions so you can then call them with only the scalar arguments in your application. For example, to use the `createUserUseCase` you need to provide a `createUser` function. This can be a mock for tests or in a production environment, it would be an adapter that connects the persistence layer to the use cases. For example:
@@ -438,7 +441,7 @@ const timer = core.getTimersByUserIdUseCase(userAdapter.userExists)(timerAdapter
 **Description:** Passes the `timerId` to `getTimerById` which returns a timer entity. Creates a copy of the entity with the `isRunning` property set to `true`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`. 
 
 **Arguments:**
-- getTimerById: Function
+- findTimerById: Function
 - saveTimer: Function
 - timerId: String
 
@@ -453,7 +456,7 @@ const startedTimer = core.startTimerUseCase(timerAdapter.getTimerById)(timerAdap
 **Description:** Passes the `timerId` to `getTimerById` which returns a timer entity. Creates a copy of the entity with the `isRunning` property set to `false`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
 
 **Arguments:**
-- getTimerById: Function
+- findTimerById: Function
 - saveTimer: Function
 - timerId: String
 
@@ -469,7 +472,7 @@ const stoppedTimer = core.stopTimerUseCase(timerAdapter.getTimerById)(timerAdapt
 **Description:** Passes the `timerId` to `getTimerById` which returns a timer entity. Creates a copy of the entity with the `remainingDuration` property set to `remainingDuration - intervalDuration`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
 
 **Arguments:**
-- getTimerById: Function
+- findTimerById: Function
 - saveTimer: Function
 - timerId: String
 
@@ -485,7 +488,7 @@ const decrementedTimer = core.decrementTimerUseCase(timerAdapter.getTimerById)(t
 **Description:** Passes the `timerId` to `getTimerById` which returns a timer entity. Creates a copy of the entity with the `remainingDuration` property set to `duration`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
 
 **Arguments:**
-- getTimerById: Function
+- findTimerById: Function
 - saveTimer: Function
 - timerId: String
 
