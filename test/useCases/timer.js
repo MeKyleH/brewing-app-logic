@@ -226,23 +226,96 @@ describe('getTimersByUserId use case', () => {
 describe('start timer use case', () => {
   describe('happy path', () => {
 
-    it('should return the timer with isRunning true', () => {
-      const getTimerById = () =>  ({
+    let findTimerByIdCalled = false
+    let findTimerByIdArg = ""
+    const findTimerById = id => {
+      findTimerByIdCalled = true
+      findTimerByIdArg = id
+      return {
         id: "1",
         duration: 1000,
         remainingDuration: 1000,
         intervalDuration: 1000,
         isRunning: false
-      })
-      const saveTimer = () => console.log('timer saved!')
-      const startedTimer = core.startTimerUseCase(getTimerById)(saveTimer)("1")
+      }
+    }
+
+    let saveTimerCalled = false
+    let saveTimerArg = {}
+    const saveTimer = timer => {
+      saveTimerCalled = true
+      saveTimerArg = timer
+    }
+
+    const startedTimer = core.startTimerUseCase(findTimerById)(saveTimer)("1")
+
+    it('should call findTimerById', () => {
+      findTimerByIdCalled.should.equal(true)
+    })
+
+    it('should pass id to findTimerById', () => {
+      findTimerByIdArg.should.equal("1")
+    })
+
+    it('should call saveTimer', () => {
+      saveTimerCalled.should.equal(true)
+    })
+
+    it('should pass started timer to saveTimer', () => {
+      saveTimerArg.should.equal(startedTimer)
+    })
+
+    it('should return an object', () => {
       startedTimer.should.be.an('object')
+    })
+
+    it('should have id prop equal to id arg', () => {
       startedTimer.id.should.equal("1")
-      startedTimer.duration.should.equal(1000)
-      startedTimer.remainingDuration.should.equal(1000)
-      startedTimer.intervalDuration.should.equal(1000)
+    })
+
+    it('should have isRunning prop equal true', () => {
       startedTimer.isRunning.should.equal(true)
     })
+
+  })
+
+  describe('error path', () => {
+
+    const findTimerById = () => {}
+    const saveTimer = () => {}
+
+    describe('when findTimerById is not a function', () => {
+      it('should throw a type error', () => {
+        expect(() => core.startTimerUseCase('findTimerById')).to.throw(TypeError)
+      })
+    })
+
+    describe('when saveTimer is not a function', () => {
+      it('should throw a TypeError', () => {
+        expect(() => core.startTimerUseCase(findTimerById)('saveTimer')).to.throw(TypeError)
+      })
+    })
+
+    describe('when id is not of type string', () => {
+      it('should throw a type error', () => {
+        expect(() => core.startTimerUseCase(findTimerById)(saveTimer)(1)).to.throw(TypeError)
+      })
+    })
+
+    describe('when findTimerById fails', () => {
+      it('should throw an error', () => {
+        const badFindTimerById = () => {throw new Error}
+        expect(() => core.startTimerUseCase(badFindTimerById)(saveTimer)("1")).to.throw()
+      })
+    })
+
+    describe('when saveTimer fails', () => {
+      it('should throw an error', () => {
+        const badSaveTimer = () => {throw new Error}
+        expect(() => core.startTimerUseCase(findTimerById)(badSaveTimer)("1")).to.throw()
+      })
+    })
+
   })
 })
 
