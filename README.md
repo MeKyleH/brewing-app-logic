@@ -8,7 +8,8 @@ This is the core business logic for a brewing app that I am building. It is buil
 `npm install git+ssh://git@github.com:severnsc/brewing-app-logic.git`
 
 ## Todo
-- prevent editing of userId property for items 
+- prevent editing of userId property for items
+- add better tests for timer use cases
 
 ## Usage
 
