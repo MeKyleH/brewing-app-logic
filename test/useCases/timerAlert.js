@@ -600,7 +600,7 @@ describe('delete timerAlert use case', () => {
   describe('happy path', () => {
 
     const id = "1"
-    core.deleteTimerAlertUseCase(_deleteTimerAlert)(id)
+    const deletedTimerAlert = core.deleteTimerAlertUseCase(_deleteTimerAlert)(id)
 
     it('should call deleteTimerAlert injected dependency', () => {
       deleteTimerAlertCalled.should.equal(true)
@@ -608,6 +608,10 @@ describe('delete timerAlert use case', () => {
 
     it('should pass timerId to deleteFunc', () => {
       deleteTimerAlertId.should.equal(id)
+    })
+
+    it('should return null', () => {
+      should.equal(null, deletedTimerAlert)
     })
 
   })
