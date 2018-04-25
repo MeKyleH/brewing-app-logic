@@ -439,7 +439,7 @@ const timer = core.getTimersByUserIdUseCase(userAdapter.userExists)(timerAdapter
 ```
 
 #### Start Timer
-**Description:** Passes the `timerId` to `getTimerById` which returns a timer entity. Creates a copy of the entity with the `isRunning` property set to `true`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`. 
+**Description:** Passes the `timerId` to `findTimerById` which returns a timer entity. Creates a copy of the entity with the `isRunning` property set to `true`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`. 
 
 **Arguments:**
 - findTimerById: Function
@@ -451,10 +451,10 @@ const timer = core.getTimersByUserIdUseCase(userAdapter.userExists)(timerAdapter
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const startedTimer = core.startTimerUseCase(timerAdapter.getTimerById)(timerAdapter.saveTimer)("1")
+const startedTimer = core.startTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
 ```
 #### Stop Timer
-**Description:** Passes the `timerId` to `getTimerById` which returns a timer entity. Creates a copy of the entity with the `isRunning` property set to `false`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
+**Description:** Passes the `timerId` to `findTimerById` which returns a timer entity. Creates a copy of the entity with the `isRunning` property set to `false`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
 
 **Arguments:**
 - findTimerById: Function
@@ -466,11 +466,11 @@ const startedTimer = core.startTimerUseCase(timerAdapter.getTimerById)(timerAdap
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const stoppedTimer = core.stopTimerUseCase(timerAdapter.getTimerById)(timerAdapter.saveTimer)("1")
+const stoppedTimer = core.stopTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
 ```
 
 #### Decrement Timer
-**Description:** Passes the `timerId` to `getTimerById` which returns a timer entity. Creates a copy of the entity with the `remainingDuration` property set to `remainingDuration - intervalDuration`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
+**Description:** Passes the `timerId` to `findTimerById` which returns a timer entity. Creates a copy of the entity with the `remainingDuration` property set to `remainingDuration - intervalDuration`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
 
 **Arguments:**
 - findTimerById: Function
@@ -482,11 +482,11 @@ const stoppedTimer = core.stopTimerUseCase(timerAdapter.getTimerById)(timerAdapt
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const decrementedTimer = core.decrementTimerUseCase(timerAdapter.getTimerById)(timerAdapter.saveTimer)("1")
+const decrementedTimer = core.decrementTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
 ```
 
 #### Reset Timer
-**Description:** Passes the `timerId` to `getTimerById` which returns a timer entity. Creates a copy of the entity with the `remainingDuration` property set to `duration`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
+**Description:** Passes the `timerId` to `findTimerById` which returns a timer entity. Creates a copy of the entity with the `remainingDuration` property set to `duration`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
 
 **Arguments:**
 - findTimerById: Function
@@ -498,7 +498,7 @@ const decrementedTimer = core.decrementTimerUseCase(timerAdapter.getTimerById)(t
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const resetTimer = core.resetTimerUseCase(timerAdapter.getTimerById)(timerAdapter.saveTimer)("1")
+const resetTimer = core.resetTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
 ```
 
 #### Update Timer
@@ -585,10 +585,10 @@ const timerAlerts = core.getTimerAlertsByTimerIdUseCase(timerAdapter.timerExists
 ```
 
 #### Update Timer Alert
-**Description:** Passes `timerAlertId` to `getTimerAlertById` which returns a `timerAlert` entity. Creates a copy of the entity merging in the `propUpdateObj`. Passes the updated entity to `saveTimerAlert`. Returns the updated entity.
+**Description:** Passes `timerAlertId` to `findTimerAlertById` which returns a `timerAlert` entity. Creates a copy of the entity merging in the `propUpdateObj`. Passes the updated entity to `saveTimerAlert`. Returns the updated entity.
 
 **Arguments:**
-- getTimerAlertById: Function (change this to findTimerAlertById)
+- findTimerAlertById: Function
 - saveTimerAlert: Function
 - id: String
 - updatePropsObj: Object
@@ -598,14 +598,14 @@ const timerAlerts = core.getTimerAlertsByTimerIdUseCase(timerAdapter.timerExists
 const core = require('brewing-app-logic')
 const timerAlertAdapter = require('timer-alert-adapter')
 
-const updatedTimerAlert = core.updateTimerAlertUseCase(timerAlertAdapter.getTimerAlertById)(timerAlertAdapter.saveTimerAlert)("1", {message: "Bye!"})
+const updatedTimerAlert = core.updateTimerAlertUseCase(timerAlertAdapter.findTimerAlertById)(timerAlertAdapter.saveTimerAlert)("1", {message: "Bye!"})
 ```
 
 #### Activate Timer Alert
-**Description:** Passes `timerAlertId` to `getTimerAlertById` which returns a `timerAlert` entity. Creates a copy of the entity changing the `activated` prop to `true`. Calls `sendMessage` passing the `message` property from the `timerAlert`. Passes the activated timer alert to `saveTimerAlert` and returns it.
+**Description:** Passes `timerAlertId` to `findTimerAlertById` which returns a `timerAlert` entity. Creates a copy of the entity changing the `activated` prop to `true`. Calls `sendMessage` passing the `message` property from the `timerAlert`. Passes the activated timer alert to `saveTimerAlert` and returns it.
 
 **Arguments:**
-- getTimerAlertById: Function
+- findTimerAlertById: Function
 - saveTimerAlert: Function
 - sendMessage: Function
 - timerAlertId: String
@@ -616,7 +616,7 @@ const core = require('brewing-app-logic')
 const timerAlertAdapter = require('timer-alert-adapter')
 const messageAdapter = require('message-adapter')
 
-const activatedTimerAlert = core.activateTimerAlertUseCase(timerAlertAdapter.getTimerAlertById)(timerAlertAdapter.saveTimerAlert)(messageAdapter.sendMessage)("1")
+const activatedTimerAlert = core.activateTimerAlertUseCase(timerAlertAdapter.findTimerAlertById)(timerAlertAdapter.saveTimerAlert)(messageAdapter.sendMessage)("1")
 ```
 
 #### Delete Timer Alert
