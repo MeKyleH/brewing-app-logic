@@ -187,12 +187,12 @@ describe('inventory item use cases', () => {
         return inventoryItemEntity.id === id
       })
     }
-    console.log(core.getInventoryItemUseCase)
+
     const id = "1"
-    const foundInventoryItem = core.getInventoryItemUseCase(findInventoryItemById)(id)
+    const foundInventoryItemPromise = core.getInventoryItemUseCase(findInventoryItemById)(id)
 
     const otherId = "2"
-    const foundInventoryItem2 = core.getInventoryItemUseCase(findInventoryItemById)(otherId)
+    const foundInventoryItem2Promise = core.getInventoryItemUseCase(findInventoryItemById)(otherId)
 
     describe('happy path', () => {
 
@@ -209,13 +209,15 @@ describe('inventory item use cases', () => {
       })
 
       it('should return inventoryItem whose id matches id arg', () => {
-        foundInventoryItem.id.should.equal(id)
-        foundInventoryItem2.id.should.equal(otherId)
+        return foundInventoryItemPromise.should.eventually.have.property('id').equal(id)
+      })
+
+      it('should return inventoryItem whose id matches id arg', () => {
+        return foundInventoryItem2Promise.should.eventually.have.property('id').equal(otherId)
       })
 
       it('should return an inventoryItemEntity', () => {
-        const inventoryItemEntityCopy = Object.assign({}, inventoryItemEntity, {id: foundInventoryItem.id})
-        foundInventoryItem.should.deep.equal(inventoryItemEntityCopy)
+        return foundInventoryItemPromise.should.eventually.deep.equal(Object.assign({}, inventoryItemEntity, {id:"1"}))
       })
 
     })
@@ -230,14 +232,16 @@ describe('inventory item use cases', () => {
 
       describe('when id is not of type string', () => {
         it('should throw a type error', () => {
-          expect(() => core.getInventoryItemUseCase(findInventoryItemById)(1)).to.throw(TypeError)
+          const promise = core.getInventoryItemUseCase(findInventoryItemById)(1)
+          promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when findInventoryItemById fails', () => {
         it('should throw an error', () => {
           const badFindInventoryItemById = () => {throw new Error}
-          expect(() => core.getInventoryItemUseCase(badFindInventoryItemById)(id)).to.throw()
+          const promise = core.getInventoryItemUseCase(badFindInventoryItemById)(id)
+          promise.should.be.rejectedWith(Error)
         })
       })
 
@@ -285,7 +289,7 @@ describe('inventory item use cases', () => {
     const updatePropsObj = {
       currentQuantity: 100
     }
-    const updatedInventoryItem = core.updateInventoryItemUseCase(findInventoryItemById)(saveInventoryItem)(id, updatePropsObj)
+    const updatedInventoryItemPromise = core.updateInventoryItemUseCase(findInventoryItemById)(saveInventoryItem)(id, updatePropsObj)
 
     describe('happy path', () => {
 
@@ -302,7 +306,7 @@ describe('inventory item use cases', () => {
       })
 
       it('should pass updatedInventoryItem to saveInventoryItem', () => {
-        saveInventoryItemArg.should.deep.equal(updatedInventoryItem)
+        return updatedInventoryItemPromise.should.eventually.deep.equal(saveInventoryItemArg)
       })
 
       it('should call findInventoryItemById', () => {
@@ -314,7 +318,7 @@ describe('inventory item use cases', () => {
       })
 
       it('should return an inventoryItem whose props are updated to match updatePropsObj', () => {
-        updatedInventoryItem.should.deep.equal(Object.assign({}, inventoryItem, updatePropsObj))
+        updatedInventoryItemPromise.should.eventually.deep.equal(Object.assign({}, inventoryItem, updatePropsObj))
       })
 
     })
@@ -337,63 +341,73 @@ describe('inventory item use cases', () => {
 
       describe('when id is not of type string', () => {
         it('should throw a type error', () => {
-          expect(() => curriedUpdateInventoryItemUseCase(1)).to.throw(TypeError)
+          const promise = curriedUpdateInventoryItemUseCase(1)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when updatePropsObj is not of type object', () => {
         it('should throw a type error', () => {
-          expect(() => curriedUpdateInventoryItemUseCase(id, "updatePropsObj")).to.throw(TypeError)
+          const promise = curriedUpdateInventoryItemUseCase(id, "updatePropsObj")
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when updatePropsObj is an array', () => {
         it('should throw a type error', () => {
-          expect(() => curriedUpdateInventoryItemUseCase(id, [])).to.throw(TypeError)
+          const promise = curriedUpdateInventoryItemUseCase(id, [])
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when updatePropsObj tries to update id', () => {
         it('should throw an error', () => {
-          expect(() => curriedUpdateInventoryItemUseCase(id, {id: 1})).to.throw()
+          const promise = curriedUpdateInventoryItemUseCase(id, {id: 1})
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when findInventoryItemById fails', () => {
         it('should throw an error', () => {
           const badFindInventoryItemById = () => {throw new Error}
-          expect(() => core.updateInventoryItemUseCase(badFindInventoryItemById)(saveInventoryItem)(id, updatePropsObj)).to.throw()
+          const promise = core.updateInventoryItemUseCase(badFindInventoryItemById)(saveInventoryItem)(id, updatePropsObj)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when updatePropsObj tries to update property that doesnt exist', () => {
         it('should throw an error', () => {
-          expect(() => curriedUpdateInventoryItemUseCase(id, {foo: "bar"})).to.throw()
+          const promise = curriedUpdateInventoryItemUseCase(id, {foo: "bar"})
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when updatePropsObj tries to update property with value not of same type', () => {
         it('should throw a type error', () => {
-          expect(() => curriedUpdateInventoryItemUseCase(id, {inventoryId: 1})).to.throw(TypeError)
+          const promise = curriedUpdateInventoryItemUseCase(id, {inventoryId: 1})
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when updatePropsObj ties to update object prop with an array', () => {
         it('should throw a type error', () => {
-          expect(() => curriedUpdateInventoryItemUseCase(id, {object: []})).to.throw(TypeError)
+          const promise = curriedUpdateInventoryItemUseCase(id, {object: []})
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when updatePropsObj tries to update object prop with null', () => {
         it('should throw a type error', () => {
-          expect(() => curriedUpdateInventoryItemUseCase(id, {object: null})).to.throw(TypeError)
+          const promise = curriedUpdateInventoryItemUseCase(id, {object: null})
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when saveInventoryItem fails', () => {
         it('should throw an error', () => {
           const badSaveInventoryItem = () => {throw new Error}
-          expect(() => core.updateInventoryItemUseCase(findInventoryItemById)(badSaveInventoryItem)(id, updatePropsObj)).to.throw()
+          const promise = core.updateInventoryItemUseCase(findInventoryItemById)(badSaveInventoryItem)(id, updatePropsObj)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
@@ -405,8 +419,8 @@ describe('inventory item use cases', () => {
 
       it('should not throw an error', () => {
         const nullUpdateObj = {lastReorderDate: null, deliveryDate: null}
-        const updatePropsObj2 = curriedUpdateInventoryItemUseCase(id, nullUpdateObj)
-        updatePropsObj2.should.deep.equal(Object.assign({}, inventoryItem, nullUpdateObj))
+        const inventoryItemPromise = curriedUpdateInventoryItemUseCase(id, nullUpdateObj)
+        inventoryItemPromise.should.eventually.deep.equal(Object.assign({}, inventoryItem, nullUpdateObj))
       })
 
     })
@@ -430,7 +444,7 @@ describe('inventory item use cases', () => {
     }
 
     const inventoryId = "1"
-    const foundInventoryItems = core.getInventoryItemsByInventoryIdUseCase(findInventoryItemsByInventoryId)(inventoryId)
+    const foundInventoryItemsPromise = core.getInventoryItemsByInventoryIdUseCase(findInventoryItemsByInventoryId)(inventoryId)
 
     describe('happy path', () => {
 
@@ -447,7 +461,7 @@ describe('inventory item use cases', () => {
       })
 
       it('should reutrn an array of inventoryItems with inventoryId equal to id arg', () => {
-        foundInventoryItems.should.deep.equal(inventoryItems.filter(item => item.inventoryId === inventoryId))
+        return foundInventoryItemsPromise.should.eventually.deep.equal(inventoryItems.filter(item => item.inventoryId === inventoryId))
       })
 
     })
@@ -462,21 +476,24 @@ describe('inventory item use cases', () => {
 
       describe('when inventoryId is not of type string', () => {
         it('should throw a type error', () => {
-          expect(() => core.getInventoryItemsByInventoryIdUseCase(findInventoryItemsByInventoryId)(1)).to.throw(TypeError)
+          const promise = core.getInventoryItemsByInventoryIdUseCase(findInventoryItemsByInventoryId)(1)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when findInventoryItemsByInventoryId fails', () => {
         it('should throw an error', () => {
           const badFindInventoryItemsByInventoryId = () => {throw new Error}
-          expect(() => core.getInventoryItemsByInventoryIdUseCase(badFindInventoryItemsByInventoryId)(inventoryId)).to.throw()
+          const promise = core.getInventoryItemsByInventoryIdUseCase(badFindInventoryItemsByInventoryId)(inventoryId)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when findInventoryItemsByInventoryId does not return an array', () => {
         it('should throw an error', () => {
           const badFindInventoryItemsByInventoryId = () => {return {}}
-          expect(() => core.getInventoryItemsByInventoryIdUseCase(badFindInventoryItemsByInventoryId)(inventoryId)).to.throw()
+          const promise = core.getInventoryItemsByInventoryIdUseCase(badFindInventoryItemsByInventoryId)(inventoryId)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
