@@ -132,7 +132,7 @@ describe('getTimer use case', () => {
   }
 
   const timerId = "1"
-  const timer = core.getTimerUseCase(findTimerById)(timerId)
+  const timerPromise = core.getTimerUseCase(findTimerById)(timerId)
 
   describe('happy path', () => {
 
@@ -149,7 +149,7 @@ describe('getTimer use case', () => {
     })
 
     it('should return timer', () => {
-      timer.should.deep.equal(testTimer)
+      return timerPromise.should.eventually.deep.equal(testTimer)
     })
 
   })
@@ -164,14 +164,16 @@ describe('getTimer use case', () => {
 
     describe('when timerId is not of type string', () => {
       it('should throw a type error', () => {
-        expect(() => core.getTimerUseCase(findTimerById)(1)).to.throw(TypeError)
+        const promise = core.getTimerUseCase(findTimerById)(1)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when findTimerById fails', () => {
       it('should throw an error', () => {
         const badFindTimerById = () => {throw new Error}
-        expect(() => core.getTimerUseCase(badFindTimerById)(timerId)).to.throw()
+        const promise = core.getTimerUseCase(badFindTimerById)(timerId)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -217,7 +219,7 @@ describe('getTimersByUserId use case', () => {
   }
 
   const userId = "1"
-  const timers = core.getTimersByUserIdUseCase(userExists)(findTimersByUserId)(userId)
+  const timersPromise = core.getTimersByUserIdUseCase(userExists)(findTimersByUserId)(userId)
 
   describe('happy path', () => {
 
@@ -236,9 +238,8 @@ describe('getTimersByUserId use case', () => {
     describe('if userExists returns false', () => {
       it('should return an empty array', () => {
         const userExistsFalse = () => false
-        const blankArray = core.getTimersByUserIdUseCase(userExistsFalse)(findTimersByUserId)(userId)
-        blankArray.should.be.an('array')
-        blankArray.length.should.equal(0)
+        const blankArrayPromise = core.getTimersByUserIdUseCase(userExistsFalse)(findTimersByUserId)(userId)
+        return blankArrayPromise.should.eventually.deep.equal([])
       })
     })
 
@@ -255,7 +256,7 @@ describe('getTimersByUserId use case', () => {
     })
 
     it('should return timers', () => {
-      timers.should.deep.equal(testTimers)
+      return timersPromise.should.eventually.deep.equal(testTimers)
     })
 
   })
@@ -276,28 +277,32 @@ describe('getTimersByUserId use case', () => {
 
     describe('when userId is not of type string', () => {
       it('should throw a type error', () => {
-        expect(() => core.getTimersByUserIdUseCase(userExists)(findTimersByUserId)(1)).to.throw(TypeError)
+        const promise = core.getTimersByUserIdUseCase(userExists)(findTimersByUserId)(1)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when userExists fails', () => {
       it('should throw an error', () => {
         const badUserExists = () => {throw new TypeError}
-        expect(() => core.getTimersByUserIdUseCase(badUserExists)(findTimersByUserId)(userId)).to.throw()
+        const promise = core.getTimersByUserIdUseCase(badUserExists)(findTimersByUserId)(userId)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when findTimersByUserId fails', () => {
       it('should throw an error', () => {
         const badFindTimersByUserId = () => {throw new Error}
-        expect(() => core.getTimersByUserIdUseCase(userExists)(badFindTimersByUserId)(userId)).to.throw()
+        const promise = core.getTimersByUserIdUseCase(userExists)(badFindTimersByUserId)(userId)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when timers is not an array', () => {
       it('should throw a TypeError', () => {
         const badFindTimersByUserId = () => ({})
-        expect(() => core.getTimersByUserIdUseCase(userExists)(badFindTimersByUserId)(userId)).to.throw(TypeError)
+        const promise = core.getTimersByUserIdUseCase(userExists)(badFindTimersByUserId)(userId)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
@@ -329,7 +334,7 @@ describe('start timer use case', () => {
       saveTimerArg = timer
     }
 
-    const startedTimer = core.startTimerUseCase(findTimerById)(saveTimer)("1")
+    const startedTimerPromise = core.startTimerUseCase(findTimerById)(saveTimer)("1")
 
     it('should call findTimerById', () => {
       findTimerByIdCalled.should.equal(true)
@@ -344,19 +349,19 @@ describe('start timer use case', () => {
     })
 
     it('should pass started timer to saveTimer', () => {
-      saveTimerArg.should.equal(startedTimer)
+     return startedTimerPromise.should.eventually.deep.equal(saveTimerArg)
     })
 
     it('should return an object', () => {
-      startedTimer.should.be.an('object')
+      return startedTimerPromise.should.eventually.be.an('object')
     })
 
     it('should have id prop equal to id arg', () => {
-      startedTimer.id.should.equal("1")
+      return startedTimerPromise.should.eventually.have.property("id").equal("1")
     })
 
     it('should have isRunning prop equal true', () => {
-      startedTimer.isRunning.should.equal(true)
+      return startedTimerPromise.should.eventually.have.property("isRunning").equal(true)
     })
 
   })
@@ -380,21 +385,24 @@ describe('start timer use case', () => {
 
     describe('when id is not of type string', () => {
       it('should throw a type error', () => {
-        expect(() => core.startTimerUseCase(findTimerById)(saveTimer)(1)).to.throw(TypeError)
+        const promise = core.startTimerUseCase(findTimerById)(saveTimer)(1)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when findTimerById fails', () => {
       it('should throw an error', () => {
         const badFindTimerById = () => {throw new Error}
-        expect(() => core.startTimerUseCase(badFindTimerById)(saveTimer)("1")).to.throw()
+        const promise = core.startTimerUseCase(badFindTimerById)(saveTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when saveTimer fails', () => {
       it('should throw an error', () => {
         const badSaveTimer = () => {throw new Error}
-        expect(() => core.startTimerUseCase(findTimerById)(badSaveTimer)("1")).to.throw()
+        const promise = core.startTimerUseCase(findTimerById)(badSaveTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -426,7 +434,7 @@ describe('stop timer use case', () => {
       saveTimerArg = timer
     }
 
-    const stoppedTimer = core.stopTimerUseCase(findTimerById)(saveTimer)("1")
+    const stoppedTimerPromise = core.stopTimerUseCase(findTimerById)(saveTimer)("1")
     
     it('should return a function after receiving findTimerById', () => {
       core.stopTimerUseCase(findTimerById).should.be.a('function')
@@ -449,19 +457,19 @@ describe('stop timer use case', () => {
     })
 
     it('should pass timer to saveTimer', () => {
-      saveTimerArg.should.deep.equal(stoppedTimer)
+      return stoppedTimerPromise.should.eventually.deep.equal(saveTimerArg)
     })
 
     it('should return an object', () => {
-      stoppedTimer.should.be.an('object')
+      return stoppedTimerPromise.should.eventually.be.an('object')
     })
 
     it('should have same id as id arg', () => {
-      stoppedTimer.id.should.equal("1")
+      return stoppedTimerPromise.should.eventually.have.property('id').equal("1")
     })
 
     it('should have isRunning equal false', () => {
-      stoppedTimer.isRunning.should.equal(false)
+      return stoppedTimerPromise.should.eventually.have.property('isRunning').equal(false)
     })
 
   })
@@ -485,21 +493,24 @@ describe('stop timer use case', () => {
 
     describe('when id is not a string', () => {
       it('should throw a TypeError', () => {
-        expect(() => core.stopTimerUseCase(findTimerById)(saveTimer)(1)).to.throw(TypeError)
+        const promise = core.stopTimerUseCase(findTimerById)(saveTimer)(1)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when findTimerById fails', () => {
       it('should throw an error', () => {
         const badFindTimerById = () => {throw new Error}
-        expect(() => core.stopTimerUseCase(badFindTimerById)(saveTimer)("1")).to.throw()
+        const promise = core.stopTimerUseCase(badFindTimerById)(saveTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when saveTimer fails', () => {
       it('should throw an error', () => {
         const badSaveTimer = () => {throw new Error}
-        expect(() => core.stopTimerUseCase(findTimerById)(badSaveTimer)("1")).to.throw()
+        const promise = core.stopTimerUseCase(findTimerById)(badSaveTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })    
 
@@ -532,7 +543,7 @@ describe('decrement timer use case', () => {
       saveTimerArg = timer
     }
 
-    const decrementedTimer = core.decrementTimerUseCase(findTimerById)(saveTimer)("1")
+    const decrementedTimerPromise = core.decrementTimerUseCase(findTimerById)(saveTimer)("1")
 
     it('should return a function after receving findTimerById', () => {
       core.decrementTimerUseCase(findTimerById).should.be.a('function')
@@ -555,19 +566,20 @@ describe('decrement timer use case', () => {
     })
 
     it("should pass timer to saveTimer", () => {
-      saveTimerArg.should.deep.equal(decrementedTimer)
+      return decrementedTimerPromise.should.eventually.deep.equal(saveTimerArg)
     })
 
     it('should return an object', () => {
-      decrementedTimer.should.be.an('object')
+      return decrementedTimerPromise.should.eventually.be.an('object')
     })
 
     it('should have an id equal to id arg', () => {
-      decrementedTimer.id.should.equal("1")
+      return decrementedTimerPromise.should.eventually.have.property("id").equal("1")
     })
 
     it('should have remainingDuration equal to duration minus intervalDuration', () => {
-      decrementedTimer.remainingDuration.should.equal(decrementedTimer.duration - decrementedTimer.intervalDuration)
+      const timer = findTimerById()
+      return decrementedTimerPromise.should.eventually.have.property('remainingDuration').equal(timer.duration - timer.intervalDuration)
     })
     
   })
@@ -591,21 +603,24 @@ describe('decrement timer use case', () => {
 
     describe('when id is not a string', () => {
       it('should throw a TypeError', () => {
-        expect(() => core.decrementTimerUseCase(findTimerById)(saveTimer)(1)).to.throw(TypeError)
+        const promise = core.decrementTimerUseCase(findTimerById)(saveTimer)(1)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when findTimerById fails', () => {
       it('should throw an error', () => {
         const badFindTimerById = () => {throw new Error}
-        expect(() => core.decrementTimerUseCase(badFindTimerById)(saveTimer)("1")).to.throw()
+        const promise = core.decrementTimerUseCase(badFindTimerById)(saveTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when saveTimer fails', () => {
       it('should throw an error', () => {
         const badSaveTimer = () => {throw new Error}
-        expect(() => core.decrementTimerUseCase(findTimerById)(badSaveTimer)("1")).to.throw()
+        const promise = core.decrementTimerUseCase(findTimerById)(badSaveTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -638,7 +653,7 @@ describe('reset timer use case', () => {
       saveTimerArg = timer
     }
 
-    const resetTimer = core.resetTimerUseCase(findTimerById)(saveTimer)("1")
+    const resetTimerPromise = core.resetTimerUseCase(findTimerById)(saveTimer)("1")
   
     it('should return a function after receving findTimerById', () => {
       core.resetTimerUseCase(findTimerById).should.be.a('function')
@@ -661,19 +676,20 @@ describe('reset timer use case', () => {
     })
 
     it('should pass resetTimer to saveTimer', () => {
-      saveTimerArg.should.deep.equal(resetTimer)
+      return resetTimerPromise.should.eventually.deep.equal(saveTimerArg)
     })
 
     it('should return an object', () => {
-      resetTimer.should.be.an('object')
+      return resetTimerPromise.should.eventually.be.an('object')
     })
 
     it('should have id equal to id arg', () => {
-      resetTimer.id.should.equal("1")
+      return resetTimerPromise.should.eventually.have.property('id').equal("1")
     })
 
     it('should have remainingDuration equal to duration', () => {
-      resetTimer.remainingDuration.should.equal(resetTimer.duration)
+      const timer = findTimerById()
+      return resetTimerPromise.should.eventually.have.property('remainingDuration').equal(timer.duration)
     })
 
   })
@@ -697,21 +713,24 @@ describe('reset timer use case', () => {
 
     describe('when id is not a string', () => {
       it('should throw a TypeError', () => {
-        expect(() => core.resetTimerUseCase(findTimerById)(saveTimer)(1)).to.throw(TypeError)
+        const promise = core.resetTimerUseCase(findTimerById)(saveTimer)(1)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when findTimerById fails', () => {
       it('should throw an error', () => {
         const badFindTimerById = () => {throw new Error}
-        expect(() => core.resetTimerUseCase(badFindTimerById)(saveTimer)("1")).to.throw()
+        const promise = core.resetTimerUseCase(badFindTimerById)(saveTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when saveTimer fails', () => {
       it('should throw an error', () => {
         const badSaveTimer = () => {throw new Error}
-        expect(() => core.resetTimerUseCase(findTimerById)(badSaveTimer)("1")).to.throw()
+        const promise = core.resetTimerUseCase(findTimerById)(badSaveTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -747,7 +766,7 @@ describe('update timer use case', () => {
   }
 
   const id = "1"
-  const updatedTimer = core.updateTimerUseCase(findTimerById)(saveTimer)(id, updatePropsObj)
+  const updatedTimerPromise = core.updateTimerUseCase(findTimerById)(saveTimer)(id, updatePropsObj)
 
   describe('happy path', () => {
 
@@ -772,11 +791,11 @@ describe('update timer use case', () => {
     })
 
     it('should pass updatedTimer to saveTimer', () => {
-      saveTimerArg.should.deep.equal(updatedTimer)
+      return updatedTimerPromise.should.eventually.deep.equal(saveTimerArg)
     })
 
     it('should return a timer with the updatePropsObj merged in', () => {
-      updatedTimer.should.deep.equal(Object.assign({}, timer, updatePropsObj))
+      return updatedTimerPromise.should.eventually.deep.equal(Object.assign({}, timer, updatePropsObj))
     })
 
   })
@@ -818,7 +837,8 @@ describe('update timer use case', () => {
     describe('when findTimerById fails', () => {
       it('should throw an error', () => {
         const badFindTimerById = () => {throw new Error}
-        expect(() => core.updateTimerUseCase(badFindTimerById)(saveTimer)(id, updatePropsObj)).to.throw()
+        const promise = core.updateTimerUseCase(badFindTimerById)(saveTimer)(id, updatePropsObj)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -867,7 +887,8 @@ describe('update timer use case', () => {
     describe('when saveTimer fails', () => {
       it('should throw an error', () => {
         const badSaveTimer = () => {throw new Error}
-        expect(() => core.updateTimerUseCase(findTimerById)(badSaveTimer)(id, updatePropsObj)).to.throw()
+        const promise = core.updateTimerUseCase(findTimerById)(badSaveTimer)(id, updatePropsObj)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
