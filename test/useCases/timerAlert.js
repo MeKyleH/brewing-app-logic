@@ -319,7 +319,7 @@ describe('getTimerAlertsByTimerId use case', () => {
 
 })
 
-describe('updateTimerAlert use case', () => {
+describe('updatedTimerAlert use case', () => {
 
   let getTimerAlertByIdCalled = false
   let getTimerAlertId = 0
@@ -541,9 +541,9 @@ describe("activateTimerAlert use case", () => {
   describe('error path', () => {
     describe('when injected dependencies arent funcs', () => {
       it('should throw a type error', () => {
-        expect(core.activateTimerAlertUseCase("getTimerAlertById")(saveTimerAlert)(sendMessage)).to.throw(TypeError)
-        expect(core.activateTimerAlertUseCase(getTimerAlertById)("saveTimerAlert")(sendMessage)).to.throw(TypeError)
-        expect(core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("sendMessage")).to.throw(TypeError)
+        expect(() => core.activateTimerAlertUseCase("getTimerAlertById")(saveTimerAlert)(sendMessage)).to.throw(TypeError)
+        expect(() => core.activateTimerAlertUseCase(getTimerAlertById)("saveTimerAlert")(sendMessage)).to.throw(TypeError)
+        expect(() => core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("sendMessage")).to.throw(TypeError)
       })
     })
 
@@ -620,7 +620,7 @@ describe('delete timerAlert use case', () => {
 
     describe('when deleteFunc dependency is not a func', () => {
       it('should throw a type error', () => {
-        expect(core.deleteTimerAlertUseCase("deleteFunc")).to.throw(TypeError)
+        expect(() => core.deleteTimerAlertUseCase("deleteFunc")).to.throw(TypeError)
       })
     })
 

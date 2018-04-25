@@ -514,7 +514,7 @@ describe('user use cases', () => {
 
       describe('when deleteUser is not a func', () => {
         it('should throw a type error', () => {
-          expect(core.deleteUserUseCase("deleteUser")).to.throw(TypeError)
+          expect(() => core.deleteUserUseCase("deleteUser")).to.throw(TypeError)
         })
       })
 
