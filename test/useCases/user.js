@@ -181,7 +181,7 @@ describe('user use cases', () => {
     }
 
     const userId = "1"
-    const user = core.getUserUseCase(findUserById)(userId)
+    const userPromise = core.getUserUseCase(findUserById)(userId)
 
     describe('happy path', () => {
 
@@ -198,7 +198,7 @@ describe('user use cases', () => {
       })
 
       it('should return user whose id matches userId', () => {
-        user.should.deep.equal(testUser)
+        return userPromise.should.eventually.deep.equal(testUser)
       })
 
     })
@@ -213,14 +213,16 @@ describe('user use cases', () => {
 
       describe('when userId is not of type string', () => {
         it('should throw a type error', () => {
-          expect(() => core.getUserUseCase(findUserById)(1)).to.throw(TypeError)
+          const promise = core.getUserUseCase(findUserById)(1)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when findUserById fails', () => {
         it('should throw an error', () => {
           const badFindUserById = () => {throw new Error}
-          expect(() => core.getUserUseCase(badFindUserById)(userId)).to.throw()
+          const promise = core.getUserUseCase(badFindUserById)(userId)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
@@ -255,7 +257,7 @@ describe('user use cases', () => {
 
     const userId = "1"
     const updatePropsObj = {userName: "testUser2"}
-    const updatedUser = core.updateUserUseCase(findUserById)(saveUser)(userId, updatePropsObj)
+    const updatedUserPromise = core.updateUserUseCase(findUserById)(saveUser)(userId, updatePropsObj)
 
     describe('happy path', () => {
 
@@ -280,14 +282,12 @@ describe('user use cases', () => {
       })
 
       it('should pass updatedUser to saveUser', () => {
-        savedUser.should.deep.equal(updatedUser)
+        return updatedUserPromise.should.eventually.deep.equal(savedUser)
       })
 
       it('should make a copy of found user merging updatePropsObj arg', () => {
         const clonedUser = Object.assign({}, testUser, updatePropsObj)
-        updatedUser.should.not.deep.equal(testUser)
-        updatedUser.id.should.equal(testUser.id)
-        updatedUser.should.deep.equal(clonedUser)
+        return updatedUserPromise.should.eventually.deep.equal(clonedUser)
       })
 
     })
@@ -308,18 +308,21 @@ describe('user use cases', () => {
 
       describe('when userId is wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.updateUserUseCase(findUserById)(saveUser)(1, updatePropsObj)).to.throw(TypeError)
+          const promise = core.updateUserUseCase(findUserById)(saveUser)(1, updatePropsObj)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when updatePropsObj is wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.updateUserUseCase(findUserById)(saveUser)(userId, "1")).to.throw(TypeError)
+          const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, "1")
+          return promise.should.be.rejectedWith(TypeError)
         })
 
         describe('when an array', () => {
           it('should throw a type error', () => {
-            expect(() => core.updateUserUseCase(findUserById)(saveUser)(userId, [])).to.throw(TypeError)
+            const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, [])
+            return promise.should.be.rejectedWith(TypeError)
           })
         })
 
@@ -327,33 +330,38 @@ describe('user use cases', () => {
 
       describe('when updatePropsObj tries to update id', () => {
         it('should throw an error', () => {
-          expect(() => core.updateUserUseCase(findUserById)(saveUser)(userId, {id: "2"})).to.throw()
+          const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, {id: "2"})
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when updatePropsObj tries to update props not on user', () => {
         it('should throw an error', () => {
-          expect(() => core.updateUserUseCase(findUserById)(saveUser)(userId, {foo: "bar"})).to.throw()
+          const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, {foo: "bar"})
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when updatePropsObj tires to update props of wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.updateUserUseCase(findUserById)(saveUser)(userId, {userName: 2})).to.throw(TypeError)
+          const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, {userName: 2})
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when findUserById throws an error', () => {
         it('should throw an error', () => {
           const findUserByIdError = () => {throw new Error}
-          expect(() => core.updateUserUseCase(findUserByIdError)(saveUser)(userId, updatePropsObj)).to.throw()
+          const promise = core.updateUserUseCase(findUserByIdError)(saveUser)(userId, updatePropsObj)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when saveUser throws an error', () => {
         it('should throw an error', () => {
           const saveUserError = () => {throw new Error}
-          expect(() => core.updateUserUseCase(findUserById)(saveUserError)(userId, updatePropsObj)).to.throw()
+          const promise = core.updateUserUseCase(findUserById)(saveUserError)(userId, updatePropsObj)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
@@ -392,7 +400,7 @@ describe('user use cases', () => {
     const userName = "userName"
     const password = "password"
 
-    const authenticatedUser = core.authenticateUserUseCase(findUserByUsername)(hashPassword)(userName, password)
+    const authenticatedUserPromise = core.authenticateUserUseCase(findUserByUsername)(hashPassword)(userName, password)
 
     describe('happy path', () => {
 
@@ -421,7 +429,7 @@ describe('user use cases', () => {
       })
 
       it('should return the user with the matching id', () => {
-        authenticatedUser.should.deep.equal(user)
+        return authenticatedUserPromise.should.eventually.deep.equal(user)
       })
 
     })
@@ -444,19 +452,21 @@ describe('user use cases', () => {
 
       describe('when hashPassword is not a func', () => {
         it('should throw a type error', () => {
-          expect(core.authenticateUserUseCase(findUserByUsername)("badHash")).to.throw(TypeError)
+          expect(() => core.authenticateUserUseCase(findUserByUsername)("badHash")).to.throw(TypeError)
         })
       })
 
       describe('when userName is of wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.authenticateUserUseCase(findUserByUsername)(hashPassword)(1, password)).to.throw(TypeError)
+          const promise = core.authenticateUserUseCase(findUserByUsername)(hashPassword)(1, password)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when password is of wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.authenticateUserUseCase(findUserByUsername)(hashPassword)(userName, 1234)).to.throw(TypeError)
+          const promise = core.authenticateUserUseCase(findUserByUsername)(hashPassword)(userName, 1234)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
