@@ -142,7 +142,7 @@ describe('getTimerAlert use case', () => {
   }
 
   const timerAlertId = "1"
-  const timerAlert = core.getTimerAlertUseCase(findTimerAlertById)(timerAlertId)
+  const timerAlertPromise = core.getTimerAlertUseCase(findTimerAlertById)(timerAlertId)
 
   describe('happy path', () => {
 
@@ -159,7 +159,7 @@ describe('getTimerAlert use case', () => {
     })
 
     it('should return timerAlert with matching id', () => {
-      timerAlert.should.deep.equal(testTimerAlert)
+      return timerAlertPromise.should.eventually.deep.equal(testTimerAlert)
     })
 
   })
@@ -174,14 +174,16 @@ describe('getTimerAlert use case', () => {
 
     describe('when timerAlertId is not of type string', () => {
       it('should throw a type error', () => {
-        expect(() => core.getTimerAlertUseCase(findTimerAlertById)(1)).to.throw(TypeError)
+        const promise = core.getTimerAlertUseCase(findTimerAlertById)(1)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when findTimerAlertById fails', () => {
       it('should throw an error', () => {
         const badFindTimerAlertById = () => {throw new Error}
-        expect(() => core.getTimerAlertUseCase(badFindTimerAlertById)(timerAlertId)).to.throw()
+        const promise = core.getTimerAlertUseCase(badFindTimerAlertById)(timerAlertId)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -229,7 +231,7 @@ describe('getTimerAlertsByTimerId use case', () => {
   }
 
   const timerId = "1"
-  const timerAlerts = core.getTimerAlertsByTimerIdUseCase(timerExists)(findTimerAlertsByTimerId)(timerId)
+  const timerAlertsPromise = core.getTimerAlertsByTimerIdUseCase(timerExists)(findTimerAlertsByTimerId)(timerId)
 
   describe('happy path', () => {
 
@@ -251,9 +253,8 @@ describe('getTimerAlertsByTimerId use case', () => {
 
     it('should return empty array if timerExists returns false', () => {
       const timerExistsFalse = () => false
-      const blankArray = core.getTimerAlertsByTimerIdUseCase(timerExistsFalse)(findTimerAlertsByTimerId)(timerId)  
-      blankArray.should.be.an('array')
-      blankArray.length.should.equal(0)
+      const blankArrayPromise = core.getTimerAlertsByTimerIdUseCase(timerExistsFalse)(findTimerAlertsByTimerId)(timerId)  
+      return blankArrayPromise.should.eventually.deep.equal([])
     })
 
     describe('if timerExists returns true', () => {
@@ -267,7 +268,7 @@ describe('getTimerAlertsByTimerId use case', () => {
       })
 
       it('should return timerAlerts', () => {
-        timerAlerts.should.deep.equal(testTimerAlerts)
+        timerAlertsPromise.should.eventually.deep.equal(testTimerAlerts)
       })
 
     })
@@ -290,28 +291,32 @@ describe('getTimerAlertsByTimerId use case', () => {
 
     describe('when timerId is not of type string', () => {
       it('should throw a type error', () => {
-        expect(() => core.getTimerAlertsByTimerIdUseCase(timerExists)(findTimerAlertsByTimerId)(1)).to.throw(TypeError)
+        const promise = core.getTimerAlertsByTimerIdUseCase(timerExists)(findTimerAlertsByTimerId)(1)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when timerExists fails', () => {
       it('should throw an error', () => {
         const badTimerExists = () => {throw new Error}
-        expect(() => core.getTimerAlertsByTimerIdUseCase(badTimerExists)(findTimerAlertsByTimerId)(timerId)).to.throw()
+        const promise = core.getTimerAlertsByTimerIdUseCase(badTimerExists)(findTimerAlertsByTimerId)(timerId)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when findTimerAlertsByTimerId fails', () => {
       it("should throw an error", () => {
         const badFindTimerAlertsByTimerId = () => {throw new Error}
-        expect(() => core.getTimerAlertsByTimerIdUseCase(timerExists)(badFindTimerAlertsByTimerId)(timerId)).to.throw()
+        const promise = core.getTimerAlertsByTimerIdUseCase(timerExists)(badFindTimerAlertsByTimerId)(timerId)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when timerAlerts is not of type array', () => {
       it('should throw a type error', () => {
         const badFindTimerAlertsByTimerId = () => ({})
-        expect(() => core.getTimerAlertsByTimerIdUseCase(timerExists)(badFindTimerAlertsByTimerId)(timerId)).to.throw(TypeError)
+        const promise = core.getTimerAlertsByTimerIdUseCase(timerExists)(badFindTimerAlertsByTimerId)(timerId)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -349,7 +354,7 @@ describe('updatedTimerAlert use case', () => {
   describe('happy path', () => {
 
     const updateTimerAlert = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)
-    const updatedTimerAlert = updateTimerAlert("1", {message: "new message", activationTime: 20, timerId: "blargh"})
+    const updatedTimerAlertPromise = updateTimerAlert("1", {message: "new message", activationTime: 20, timerId: "blargh"})
 
     it('should call getTimerAlertById injected dependency', () => {
       getTimerAlertByIdCalled.should.equal(true)
@@ -364,14 +369,19 @@ describe('updatedTimerAlert use case', () => {
     })
 
     it('should pass updatedTimerAlert to saveTimer', () => {
-      savedTimerAlert.should.equal(updatedTimerAlert)
+      return updatedTimerAlertPromise.should.eventually.deep.equal(savedTimerAlert)
     })
 
-    it('should return new timerAlert with fields updated to match args', () => {
-      updatedTimerAlert.message.should.equal("new message")
-      updatedTimerAlert.activationTime.should.equal(20)
-      updatedTimerAlert.timerId.should.equal("blargh")
-      dummyTimerAlert.should.deep.equal({id: "1",name: "timerAlert",message: "hello",activated: false, activationTime: 0,timerId: "0"})
+    it('should return new timer alert with message equal arg', () => {
+      return updatedTimerAlertPromise.should.eventually.have.property("message").equal("new message")
+    })
+
+    it('should return new timer with activationTime property equal to arg', () => {
+      return updatedTimerAlertPromise.should.eventually.have.property('activationTime').equal(20)
+    })
+
+    it('should return new timer with timerId equal to arg', () => {
+      return updatedTimerAlertPromise.should.eventually.have.property("timerId").equal("blargh")
     })
 
   })
@@ -392,7 +402,8 @@ describe('updatedTimerAlert use case', () => {
 
     describe('when first arg is of wrong type', () => {
       it('should throw a type error', () => {
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(1, {message: "new message", activationTime: 20, timerId: "blargh"})).to.throw(TypeError)
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(1, {message: "new message", activationTime: 20, timerId: "blargh"})
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
@@ -400,13 +411,15 @@ describe('updatedTimerAlert use case', () => {
       
       describe('not an array or object', () => {
         it('should throw a type error', () => {
-          expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", "new message")).to.throw(TypeError)
+          const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", "new message")
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when array', () => {
         it('should throw a type error', () => {
-          expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", ["new message"])).to.throw(TypeError)
+          const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", ["new message"])
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
@@ -414,54 +427,69 @@ describe('updatedTimerAlert use case', () => {
 
     describe('when attempting to update props that dont currently exist', () => {
       it('should throw an error', () => {
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {foo: "bar"})).to.throw()
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {foo: "bar"})
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when attempting to update props with wrong types', () => {
-      it('should throw a type error', () => {
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: 1})).to.throw(TypeError)
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: true})).to.throw(TypeError)
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: "hello",activationTime: 0,timerId: 1})).to.throw(TypeError)
+      it('should throw a type error when message is number', () => {
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: 1})
+        return promise.should.be.rejectedWith(TypeError)
+      })
+
+      it('should throw a type error when message is boolean', () => {
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: true})
+        return promise.should.be.rejectedWith(TypeError)
+      })
+
+      it('should throw a type error when timerId is string', () => {
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {message: "hello",activationTime: 0,timerId: 1})
       })
     })
 
     describe('when attempting to update id prop', () => {
       it('should throw an error', () => {
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {id: "2"})).to.throw()
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {id: "2"})
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when attempting to update activated prop', () => {
       it('should throw an error', () => {
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {activated: true})).to.throw()
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {activated: true})
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when attempting to update both id and activated', () => {
       it('should throw an error', () => {
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {id: "2", activated: true})).to.throw()
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)("1", {id: "2", activated: true})
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when getTimerAlertById throws error', () => {
       it('should throw error', () => {
         const getTimerAlertByIdError = () => {throw new Error}
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertByIdError)(saveTimerAlert)("1", {message: "hello"})).to.throw()
+        const promise = core.updateTimerAlertUseCase(getTimerAlertByIdError)(saveTimerAlert)("1", {message: "hello"})
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when getTimerAlertById returns nothing', () => {
       it('should throw an error', () => {
         const getTimerAlertByIdNull = () => {}
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertByIdNull)(saveTimerAlert)("1", {message: "hello"})).to.throw()
+        const promise = core.updateTimerAlertUseCase(getTimerAlertByIdNull)(saveTimerAlert)("1", {message: "hello"})
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when saveTimerAlert throws an error', () => {
       it('should throw an error', () => {
         const saveTimerAlertError = () => {throw new Error}
-        expect(() => core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlertError)("1", {message: "hello"})).to.throw()
+        const promise = core.updateTimerAlertUseCase(getTimerAlertById)(saveTimerAlertError)("1", {message: "hello"})
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -504,7 +532,7 @@ describe("activateTimerAlert use case", () => {
   describe('happy path', () => {
 
     const activateTimerAlert = core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(sendMessage)
-    const activatedTimerAlert = activateTimerAlert("1")
+    const activatedTimerAlertPromise = activateTimerAlert("1")
 
     it('should call getTimerAlertId injected dependency', () => {
       getTimerAlertByIdCalled.should.equal(true)
@@ -519,7 +547,7 @@ describe("activateTimerAlert use case", () => {
     })
 
     it('should pass activatedTimerAlert to saveTimer', () => {
-      savedTimerAlert.should.equal(activatedTimerAlert)
+      return activatedTimerAlertPromise.should.eventually.deep.equal(savedTimerAlert)
     })
 
     it('should call send message injected dependency', () => {
@@ -527,13 +555,11 @@ describe("activateTimerAlert use case", () => {
     })
 
     it('should pass message to send message', () => {
-      sentMessage.should.equal(activatedTimerAlert.message)
+      return activatedTimerAlertPromise.should.eventually.have.property('message').equal(sentMessage)
     })
 
     it('should return new timerAlert with activated true', () => {
-      activatedTimerAlert.activated.should.equal(true)
-      activatedTimerAlert.should.not.equal(dummyTimerAlert)
-      dummyTimerAlert.should.deep.equal({id: "1",name: "timerAlert",message: "hello",activated: false})
+      return activatedTimerAlertPromise.should.eventually.have.property('activated').equal(true)
     })
 
   })
@@ -552,14 +578,16 @@ describe("activateTimerAlert use case", () => {
       const activateTimerAlert = core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(sendMessage)
 
       it('should throw a type error', () => {
-        expect(() => activateTimerAlert(1)).to.throw(TypeError)
+        const promise = activateTimerAlert(1)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when getTimerAlertById throws error', () => {
       it('should throw error', () => {
         const getTimerAlertByIdError = () => {throw new Error}
-        expect(() => core.activateTimerAlertUseCase(getTimerAlertByIdError)(saveTimerAlert)(sendMessage)("1").to.throw())
+        const promise = core.activateTimerAlertUseCase(getTimerAlertByIdError)(saveTimerAlert)(sendMessage)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
@@ -573,14 +601,16 @@ describe("activateTimerAlert use case", () => {
     describe('when saveTimerAlert throws an error', () => {
       it('should throw an error', () => {
         const saveTimerAlertError = () => {throw new Error}
-        expect(() => core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlertError)(sendMessage)("1")).to.throw()
+        const promise = core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlertError)(sendMessage)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when sendMessage throws an error', () => {
       it('should throw an error', () => {
         const sendMessageError = () => {throw new Error}
-        expect(() => core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(sendMessageError)("1")).to.throw()
+        const promise = core.activateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)(sendMessageError)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
