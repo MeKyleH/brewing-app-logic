@@ -467,7 +467,7 @@ describe('inventory use cases', () => {
     }
 
     const inventoryId = "1"
-    const deletedInventory = core.deleteInventoryUseCase(deleteInventory)(inventoryId)
+    const deletedInventoryPromise = core.deleteInventoryUseCase(deleteInventory)(inventoryId)
 
     describe('happy path', () => {
 
@@ -484,7 +484,7 @@ describe('inventory use cases', () => {
       })
 
       it('should return null after deleting', () => {
-        should.equal(deletedInventory, null)
+        return deletedInventoryPromise.should.eventually.be.a('null')
       })
 
     })
@@ -499,14 +499,16 @@ describe('inventory use cases', () => {
 
       describe('when inventoryId is not a string', () => {
         it('should throw a type error', () => {
-          expect(() => core.deleteInventoryUseCase(deleteInventory)(1)).to.throw(TypeError)
+          const promise = core.deleteInventoryUseCase(deleteInventory)(1)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe("when deleteInventory fails", () => {
         it('should throw an error', () => {
           const badDeleteInventory = () => {throw new Error}
-          expect(() => core.deleteInventoryUseCase(badDeleteInventory)(inventoryId)).to.throw()
+          const promise = core.deleteInventoryUseCase(badDeleteInventory)(inventoryId)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 

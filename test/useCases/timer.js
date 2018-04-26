@@ -903,7 +903,7 @@ describe('delete timer use case', () => {
   }
 
   const id = "1"
-  const deletedTimer = core.deleteTimerUseCase(deleteTimer)(id)
+  const deletedTimerPromise = core.deleteTimerUseCase(deleteTimer)(id)
 
   describe('happy path', () => {
 
@@ -920,7 +920,7 @@ describe('delete timer use case', () => {
     })
 
     it('should return null', () => {
-      should.equal(null, deletedTimer)
+      return deletedTimerPromise.should.eventually.be.a('null')
     })
 
   })
@@ -935,14 +935,16 @@ describe('delete timer use case', () => {
 
     describe('when id is not a string', () => {
       it('should throw a type error', () => {
-        expect(() => core.deleteTimerUseCase(deleteTimer)(1)).to.throw(TypeError)
+        const promise = core.deleteTimerUseCase(deleteTimer)(1)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when deleteTimer fails', () => {
       it('should throw an error', () => {
         const badDeleteTimer = () => {throw new Error}
-        expect(() => core.deleteTimerUseCase(badDeleteTimer)("1")).to.throw()
+        const promise = core.deleteTimerUseCase(badDeleteTimer)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 

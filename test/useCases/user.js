@@ -502,7 +502,7 @@ describe('user use cases', () => {
     }
 
     const userId = "1"
-    const deletedUser = core.deleteUserUseCase(deleteUser)(userId)
+    const deletedUserPromise = core.deleteUserUseCase(deleteUser)(userId)
 
     describe('happy path', () => {
 
@@ -519,7 +519,7 @@ describe('user use cases', () => {
       })
 
       it('should return null after deletion', () => {
-        should.equal(deletedUser, null)
+        return deletedUserPromise.should.eventually.be.a('null')
       })
 
     })
@@ -534,14 +534,16 @@ describe('user use cases', () => {
 
       describe('when userId is not of type string', () => {
         it('should throw a type error', () => {
-          expect(() => core.deleteUserUseCase(deleteUser)(1)).to.throw(TypeError)
+          const promise = core.deleteUserUseCase(deleteUser)(1)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when deleteUser fails', () => {
         it('should throw an error', () => {
           const badDeleteUser = () => {throw new Error}
-          expect(() => core.deleteUserUseCase(badDeleteUser)(userId)).to.throw()
+          const promise = core.deleteUserUseCase(badDeleteUser)(userId)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 

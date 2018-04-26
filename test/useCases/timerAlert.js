@@ -630,7 +630,7 @@ describe('delete timerAlert use case', () => {
   describe('happy path', () => {
 
     const id = "1"
-    const deletedTimerAlert = core.deleteTimerAlertUseCase(_deleteTimerAlert)(id)
+    const deletedTimerAlertPromise = core.deleteTimerAlertUseCase(_deleteTimerAlert)(id)
 
     it('should call deleteTimerAlert injected dependency', () => {
       deleteTimerAlertCalled.should.equal(true)
@@ -641,7 +641,7 @@ describe('delete timerAlert use case', () => {
     })
 
     it('should return null', () => {
-      should.equal(null, deletedTimerAlert)
+      return deletedTimerAlertPromise.should.eventually.be.a('null')
     })
 
   })
@@ -657,13 +657,15 @@ describe('delete timerAlert use case', () => {
     describe('when deleteFunc throws an error', () => {
       it('should throw an error', () => {
         const deleteFuncError = () => {throw new Error}
-        expect(core.deleteTimerAlertUseCase(deleteFuncError)).to.throw()
+        const promise = core.deleteTimerAlertUseCase(deleteFuncError)("1")
+        return promise.should.be.rejectedWith(Error)
       })
     })
 
     describe('when timerAlertId is of wrong type', () => {
       it('should throw a type error', () => {
-        expect(() => core.deleteTimerAlertUseCase(_deleteTimerAlert)(1)).to.throw(TypeError)
+        const promise = core.deleteTimerAlertUseCase(_deleteTimerAlert)(1)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
