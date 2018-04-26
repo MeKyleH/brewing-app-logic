@@ -11,14 +11,14 @@ describe('inventory use cases', () => {
 
     let createInventoryCalled = false
     let createInventoryArg = {}
-    const createInventory = inventoryArg => {
+    const createInventory = async inventoryArg => {
       createInventoryCalled = true
       createInventoryArg = inventoryArg
     }
 
     const name = "test inventory"
     const userId = "1"
-    const inventory = core.createInventoryUseCase(createInventory)(name, userId)
+    const inventoryPromise = core.createInventoryUseCase(createInventory)(name, userId)
 
     describe('happy path', () => {
 
@@ -31,34 +31,34 @@ describe('inventory use cases', () => {
       })
 
       it('should return an object', () => {
-        inventory.should.be.an('object')
+        return inventoryPromise.should.eventually.be.an('object')
       })
 
       it('should return obj with property name equal to arg name', () => {
-        inventory.name.should.equal(name)
+        return inventoryPromise.should.eventually.have.property("name").equal(name)
       })
 
       it('should return obj with property userId equal to arg userId', () => {
-        inventory.userId.should.equal(userId)
+        return inventoryPromise.should.eventually.have.property("userId").equal(userId)
       })
 
       it('should reutrn obj with string property id', () => {
-        inventory.should.have.property('id')
+        return inventoryPromise.should.eventually.have.property('id')
       })
 
-      it('should return unique ids', () => {
-        const inventory2 = core.createInventoryUseCase(createInventory)(name, userId)
-        inventory2.id.should.not.equal(inventory.id)
+      it('should return unique ids', async () => {
+        const inventory = await inventoryPromise
+        const inventoryPromise2 = core.createInventoryUseCase(createInventory)(name, userId)
+        return inventoryPromise2.should.eventually.have.property("id").not.equal(inventory.id)
       })
 
       it('should have empty array property items', () => {
-        inventory.items.should.be.an('array')
-        inventory.items.length.should.equal(0)
+        return inventoryPromise.should.eventually.have.property("items").deep.equal([])
       })
 
       it('should pass created inventory to createInventory', () => {
-        const testInventory = core.createInventoryUseCase(createInventory)(name, userId)
-        createInventoryArg.should.deep.equal(testInventory)
+        const testInventoryPromise = core.createInventoryUseCase(createInventory)(name, userId)
+        return testInventoryPromise.should.eventually.deep.equal(createInventoryArg)
       })
 
     })
@@ -67,26 +67,29 @@ describe('inventory use cases', () => {
 
       describe('when createInventory is not a function', () => {
         it('should throw a type error', () => {
-          expect(core.createInventoryUseCase("createUser")).to.throw(TypeError)
+          expect(() => core.createInventoryUseCase("createUser")).to.throw(TypeError)
         })
       })
 
       describe('when name is not of type string', () => {
         it('should throw a type error', () => {
-          expect(() => core.createInventoryUseCase(createInventory)(1, userId)).to.throw(TypeError)
+          const promise = core.createInventoryUseCase(createInventory)(1, userId)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when userId is not of type string', () => {
         it('should throw a type error', () => {
-          expect(() => core.createInventoryUseCase(createInventory)(name, 1)).to.throw(TypeError)
+          const promise = core.createInventoryUseCase(createInventory)(name, 1)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when createInventory fails', () => {
         it('should throw an error', () => {
           const badCreateInventory = () => {throw new Error}
-          expect(() => core.createInventoryUseCase(badCreateInventory)(name, userId)).to.throw()
+          const promise = core.createInventoryUseCase(badCreateInventory)(name, userId)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 

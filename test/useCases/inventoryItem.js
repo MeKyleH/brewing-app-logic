@@ -26,7 +26,7 @@ describe('inventory item use cases', () => {
 
     let createInventoryItemCalled = false
     let createInventoryItemArg = {}
-    const createInventoryItem = inventoryItem => {
+    const createInventoryItem = async inventoryItem => {
       createInventoryItemCalled = true
       createInventoryItemArg = inventoryItem
     }
@@ -38,7 +38,7 @@ describe('inventory item use cases', () => {
       addToInventoryArg = item
     }
 
-    const createdItem = core.createInventoryItemUseCase(createInventoryItem)(addToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)
+    const createdItemPromise = core.createInventoryItemUseCase(createInventoryItem)(addToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)
 
     describe('happy path', () => {
 
@@ -55,7 +55,7 @@ describe('inventory item use cases', () => {
       })
 
       it('should pass inventoryItem entity to createInventoryItem', () => {
-        createInventoryItemArg.should.deep.equal(createdItem)
+        return createdItemPromise.should.eventually.deep.equal(createInventoryItemArg)
       })
 
       it('should call addToInventory function', () => {
@@ -63,64 +63,65 @@ describe('inventory item use cases', () => {
       })
 
       it('should pass inventoryItem to addToInventory', () => {
-        addToInventoryArg.should.equal(createdItem)
+        return createdItemPromise.should.eventually.equal(addToInventoryArg)
       })
 
       it('should have inventoryId prop equal to inventoryId arg', () => {
-        createdItem.inventoryId.should.equal(inventoryId)
+        return createdItemPromise.should.eventually.have.property("inventoryId").equal(inventoryId)
       })
 
       it('should have object prop equal to object arg', () => {
-        createdItem.object.should.deep.equal(object)
+        return createdItemPromise.should.eventually.have.property("object").deep.equal(object)
       })
 
       it('should have quantityUnit prop equal to quantityUnit arg', () => {
-        createdItem.quantityUnit.should.equal(quantityUnit)
+        return createdItemPromise.should.eventually.have.property("quantityUnit").equal(quantityUnit)
       })
 
       it('should have currentQuantity prop equal to currentQuantity arg', () => {
-        createdItem.currentQuantity.should.equal(currentQuantity)
+        return createdItemPromise.should.eventually.have.property("currentQuantity").equal(currentQuantity)
       })
 
       it('should have reorderQuantity prop equal to reorderQuantity arg', () => {
-        createdItem.reorderQuantity.should.equal(reorderQuantity)
+        return createdItemPromise.should.eventually.have.property("reorderQuantity").equal(reorderQuantity)
       })
 
       it('should have reorderThreshold prop equal to reorderThreshold arg', () => {
-        createdItem.reorderThreshold.should.equal(reorderThreshold)
+        return createdItemPromise.should.eventually.have.property("reorderThreshold").equal(reorderThreshold)
       })
 
       it('should have costUnit prop equal to costUnit arg', () => {
-        createdItem.costUnit.should.equal(costUnit)
+        return createdItemPromise.should.eventually.have.property("costUnit").equal(costUnit)
       })
 
       it('should have unitCost prop equal to unitCost arg', () => {
-        createdItem.unitCost.should.equal(unitCost)
+        return createdItemPromise.should.eventually.have.property("unitCost").equal(unitCost)
       })
 
       it('should have reorderCost prop equal to reorderCost arg', () => {
-        createdItem.reorderCost.should.equal(reorderCost)
+        return createdItemPromise.should.eventually.have.property("reorderCost").equal(reorderCost)
       })
 
       it('should have lastReorderDate prop equal to lastReorderDate arg', () => {
-        createdItem.lastReorderDate.should.equal(lastReorderDate)
+        return createdItemPromise.should.eventually.have.property("lastReorderDate").equal(lastReorderDate)
       })
 
       it('should have deliveryDate prop equal to deliveryDate arg', () => {
-        createdItem.deliveryDate.should.equal(deliveryDate)
+        return createdItemPromise.should.eventually.have.property("deliveryDate").equal(deliveryDate)
       })
 
       it('should have createdAt prop equal to createdAt arg', () => {
-        createdItem.createdAt.should.equal(createdAt)
+        return createdItemPromise.should.eventually.have.property("createdAt").equal(createdAt)
       })
 
       it('should have updatedAt prop equal to updatedAt arg', () => {
-        createdItem.updatedAt.should.equal(updatedAt)
+        return createdItemPromise.should.eventually.have.property("updatedAt").equal(updatedAt)
       })
 
-      it('should return an inventoryItem entity', () => {
+      it('should return an inventoryItem entity', async () => {
+        const createdItem = await createdItemPromise
         const inventoryItemEntityCopy = Object.assign({}, inventoryItemEntity, {id: createdItem.id})
-        createdItem.should.deep.equal(inventoryItemEntityCopy)
+        return createdItem.should.deep.equal(inventoryItemEntityCopy)
       })
 
     })
@@ -133,17 +134,25 @@ describe('inventory item use cases', () => {
         })
       })
 
+      describe('when addToInventory is not a function', () => {
+        it('should throw a TypeError', () => {
+          expect(() => core.createInventoryItemUseCase(createInventoryItem)("addToInventory")).to.throw(TypeError)
+        })
+      })
+
       describe('when createInventoryItem fails', () => {
         it('should throw an error', () => {
           const badCreateInventoryItem = () => {throw new Error}
-          expect(() => core.createInventoryItemUseCase(badCreateInventoryItem)(addToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)).to.throw()
+          const promise = core.createInventoryItemUseCase(badCreateInventoryItem)(addToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when addToInventory fails', () => {
         it('should throw an error', () => {
           const badAddToInventory = () => {throw new Error}
-          expect(() => core.createInventoryItemUseCase(createInventoryItem)(badAddToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)).to.throw()
+          const promise = core.createInventoryItemUseCase(createInventoryItem)(badAddToInventory)(inventoryId, object, quantityUnit, currentQuantity, reorderQuantity, reorderThreshold, costUnit, unitCost, reorderCost, lastReorderDate, deliveryDate, createdAt, updatedAt)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 

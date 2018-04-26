@@ -9,12 +9,12 @@ describe('create timer use case', () => {
 
     let createTimerCalled = false
     let createTimerArg = {}
-    const createTimer = timer => {
+    const createTimer = async timer => {
       createTimerCalled = true
       createTimerArg = timer
     }
 
-    const timer = core.createTimerUseCase(createTimer)("1", 1000, 500)
+    const timerPromise = core.createTimerUseCase(createTimer)("1", 1000, 500)
     
     it('should return a function after receiving createTimer', () => {
       core.createTimerUseCase(createTimer).should.be.a('function')
@@ -25,51 +25,44 @@ describe('create timer use case', () => {
     })
 
     it('should pass timer to createTimer', () => {
-      createTimerArg.should.deep.equal(timer)
+      return timerPromise.should.eventually.deep.equal(createTimerArg)
     })
 
     it('should return an object', () => {
-      timer.should.be.an('object')
+      return timerPromise.should.eventually.be.an('object')
     })
 
     it('should have string id property', () => {
-      timer.id.should.be.a('string')
+      return timerPromise.should.eventually.have.property('id').be.a('string')
     })
 
-    it('should generate unique ids', () => {
-      core.createTimerUseCase(createTimer)("1", 1000, 500).id.should.not.equal(timer.id)
+    it('should generate unique ids', async () => {
+      const timer = await timerPromise
+      return core.createTimerUseCase(createTimer)("1", 1000, 500).should.eventually.have.property("id").not.equal(timer.id)
     })
 
     it('should have string userId property', () => {
-      timer.userId.should.be.a('string')
+      return timerPromise.should.eventually.have.property('userId').be.a('string')
     })
 
     it('should have userId property equal to userId arg', () => {
-      timer.userId.should.equal("1")
+      return timerPromise.should.eventually.have.property('userId').equal("1")
     })
 
     it('should have number duration property', () => {
-      timer.duration.should.be.a('number')
+      return timerPromise.should.eventually.have.property('duration').be.a('number')
     })
 
     it('should have duration equal to duration arg', () => {
-      timer.duration.should.equal(1000)
-    })
-
-    it('should have a number intervalDuration property', () => {
-      timer.intervalDuration.should.be.a('number')
+      return timerPromise.should.eventually.have.property('duration').equal(1000)
     })
 
     it('should have a intervalDuration property equal to intervalDuration arg', () =>{
-      timer.intervalDuration.should.equal(500)
-    })
-
-    it('should have a boolean isRunning property', () => {
-      timer.isRunning.should.be.a('boolean')
+      return timerPromise.should.eventually.have.property('intervalDuration').equal(500)
     })
 
     it('should have a isRunning property equal to false', () => {
-      timer.isRunning.should.equal(false)
+      return timerPromise.should.eventually.have.property('isRunning').equal(false)
     })
 
   })
@@ -86,26 +79,30 @@ describe('create timer use case', () => {
 
     describe('when userId is not a string', () => {
       it('should throw a TypeError', () => {
-        expect(() => core.createTimerUseCase(createTimer)(1)).to.throw(TypeError)
+        const promise = core.createTimerUseCase(createTimer)(1)
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when duration is not a number', () => {
       it('should throw a TypeError', () => {
-        expect(() => core.createTimerUseCase(createTimer)("1", "1000")).to.throw(TypeError)
+        const promise = core.createTimerUseCase(createTimer)("1", "1000")
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when intervalDuration is not a number', () => {
       it('should throw a TypeError', () => {
-        expect(() => core.createTimerUseCase(createTimer)("1", 1000, "500")).to.throw(TypeError)
+        const promise = core.createTimerUseCase(createTimer)("1", 1000, "500")
+        return promise.should.be.rejectedWith(TypeError)
       })
     })
 
     describe('when createTimer fails', () => {
       it('should throw an Error', () => {
         const badCreateTimer = () => {throw new Error}
-        expect(() => core.createTimerUseCase(badCreateTimer)("1", 1000, 500)).to.throw()
+        const promise = core.createTimerUseCase(badCreateTimer)("1", 1000, 500)
+        return promise.should.be.rejectedWith(Error)
       })
     })
 

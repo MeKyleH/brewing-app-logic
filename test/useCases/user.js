@@ -10,7 +10,7 @@ describe('user use cases', () => {
     let createUserCalled = false
     let createdUser = {}
     const usernames = []
-    const createUser = user => {
+    const createUser = async user => {
       createUserCalled = true
       createdUser = user
       usernames.push(user.userName)
@@ -34,7 +34,7 @@ describe('user use cases', () => {
 
     const userName = "testUser"
     const password = "password"
-    const user = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)
+    const userPromise = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)
 
     describe('happy path', () => {
 
@@ -63,39 +63,37 @@ describe('user use cases', () => {
       })
 
       it('should pass created user to createUser', () => {
-        createdUser.should.deep.equal(user)
+        return userPromise.should.eventually.deep.equal(createdUser)
       })
 
       it('should return an object', () => {
-        user.should.be.an('object')
+        return userPromise.should.eventually.be.an('object')
       })
 
       it('should have string property id', () => {
-        user.should.have.property('id')
-        user.id.should.be.a('string')
+        return userPromise.should.eventually.have.property('id').be.a('string')
       })
 
-      it('should generate unique ids', () => {
-        const user2 = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)('testUser2', 'password')
-        user2.id.should.not.equal(user.id)
+      it('should generate unique ids', async () => {
+        const user = await userPromise
+        const userPromise2 = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)('testUser2', 'password')
+        return userPromise2.should.eventually.have.property("id").not.equal(user.id)
       })
 
       it('should have string property userName', () => {
-        user.should.have.property('userName')
-        user.userName.should.be.a('string')
+        return userPromise.should.eventually.have.property('userName').be.a('string')
       })
 
       it('should set userName equal to userName arg', () => {
-        user.userName.should.equal(userName)
+        return userPromise.should.eventually.have.property('userName').equal(userName)
       })
 
       it('should have string property hashedPassword', () => {
-        user.should.have.property('hashedPassword')
-        user.hashedPassword.should.be.a('string')
+        return userPromise.should.eventually.have.property('hashedPassword').be.a('string')
       })
 
       it('should not have password saved in cleartext', () => {
-        user.hashedPassword.should.not.equal(password)
+        return userPromise.should.eventually.have.property("hashedPassword").not.equal(password)
       })
 
     })
@@ -110,52 +108,58 @@ describe('user use cases', () => {
 
       describe('when createUser is not a func', () => {
         it('should throw a type error', () => {
-          expect(core.createUserUseCase(isUserNameUnique)("createUser")(hashPassword)).to.throw(TypeError)
+          expect(() => core.createUserUseCase(isUserNameUnique)("createUser")(hashPassword)).to.throw(TypeError)
         })
       })
 
       describe('when hashPassword is not a func', () => {
         it('should throw a type error', () => {
-          expect(core.createUserUseCase(isUserNameUnique)(createUser)("hashPassword")).to.throw(TypeError)
+          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)("hashPassword")).to.throw(TypeError)
         })
       })
 
       describe('when userName is the wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(1, password)).to.throw(TypeError)
+          const promise = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(1, password)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when userName is not unique', () => {
         it('should throw an error', () => {
-          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)).to.throw()
+          const promise = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when password is the wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, 1)).to.throw(TypeError)
+          const promise = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, 1)
+          return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when isUserNameUnique fails', () => {
         it('should throw an error', () => {
           const badIsUsernameUnique = () => {throw new Error}
-          expect(() => core.createUserUseCase(badIsUsernameUnique)(createUser)(hashPassword)(userName, password)).to.throw()
+          const promise = core.createUserUseCase(badIsUsernameUnique)(createUser)(hashPassword)(userName, password)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when createUser fails', () => {
         it('should throw an error', () => {
           const badCreateUser = () => {throw new Error}
-          expect(() => core.createUserUseCase(isUserNameUnique)(badCreateUser)(hashPassword)(userName, password)).to.throw()
+          const promise = core.createUserUseCase(isUserNameUnique)(badCreateUser)(hashPassword)(userName, password)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when hashPassword fails', () => {
         it('should throw an error', () => {
           const basHashPassword = () => {throw new Error}
-          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)(basHashPassword)(userName, password)).to.throw()
+          const promise = core.createUserUseCase(isUserNameUnique)(createUser)(basHashPassword)(userName, password)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
