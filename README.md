@@ -214,6 +214,8 @@ const core = require('brewing-app-logic')
 const inventory = core.createInventoryUseCase(...)
 ```
 
+All Use cases are asynchronous and return promises.
+
 ### Inventory Use Cases
 ---
 
@@ -230,7 +232,7 @@ const inventory = core.createInventoryUseCase(...)
 const core = require('brewing-app-logic')
 const inventoryAdapter = require('inventory-adapter')
 
-const inventory = core.createInventoryUseCase(inventoryAdapter.createInventory)("Hops Inventory", "1")
+const inventoryPromise = core.createInventoryUseCase(inventoryAdapter.createInventory)("Hops Inventory", "1")
 ```
 
 #### Get Inventory
@@ -245,7 +247,7 @@ const inventory = core.createInventoryUseCase(inventoryAdapter.createInventory)(
 const core = require('brewing-app-logic')
 const inventoryAdapter = require('inventory-adapter')
 
-const inventory = core.getInventoryUseCase(inventoryAdapter.findInventoryById)("1")
+const inventoryPromise = core.getInventoryUseCase(inventoryAdapter.findInventoryById)("1")
 ```
 
 #### Get Inventories By User Id
@@ -262,7 +264,7 @@ const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 const inventoryAdapter = require('inventory-adapter')
 
-const inventories = core.getInventoriesByUserIdUseCase(userAdapter.userExists)(inventoryAdapter.findInventoriesByUserId)("1")
+const inventoriesPromise = core.getInventoriesByUserIdUseCase(userAdapter.userExists)(inventoryAdapter.findInventoriesByUserId)("1")
 ```
 
 #### Update Inventory
@@ -279,7 +281,7 @@ const inventories = core.getInventoriesByUserIdUseCase(userAdapter.userExists)(i
 const core = require('brewing-app-logic')
 const inventoryAdapter = require('inventory-adapter')
 
-const updatedInventory = core.updateInventoryUseCase(inventoryAdapter.findInventoryById)(inventoryAdapter.saveInventory)("1", {name: "Malt Inventory"})
+const updatedInventoryPromise = core.updateInventoryUseCase(inventoryAdapter.findInventoryById)(inventoryAdapter.saveInventory)("1", {name: "Malt Inventory"})
 ```
 
 #### Delete Inventory
@@ -294,7 +296,7 @@ const updatedInventory = core.updateInventoryUseCase(inventoryAdapter.findInvent
 const core = require('brewing-app-logic')
 const inventoryAdapter = require('inventory-adapter')
 
-const deletedInventory = core.deleteInventoryUseCase(inventoryAdapter.deleteInventory)("1")
+const deletedInventoryPromise = core.deleteInventoryUseCase(inventoryAdapter.deleteInventory)("1")
 ```
 ### Inventory Item Use Cases
 ---
@@ -323,7 +325,7 @@ const deletedInventory = core.deleteInventoryUseCase(inventoryAdapter.deleteInve
 const core = require('brewing-app-logic')
 const inventoryItemAdapter = require('inventory-item-adapter')
 
-const inventoryItem = core.createInventoryItemUseCase(inventoryItemAdapter.createInventoryItem)("1", {name: "Some hops"}, "lbs", 100, 20, 10, "USD", 20, 200, null, null, new Date(), new Date())
+const inventoryItemPromise = core.createInventoryItemUseCase(inventoryItemAdapter.createInventoryItem)("1", {name: "Some hops"}, "lbs", 100, 20, 10, "USD", 20, 200, null, null, new Date(), new Date())
 ```
 
 #### Get Inventory Item
@@ -338,7 +340,7 @@ const inventoryItem = core.createInventoryItemUseCase(inventoryItemAdapter.creat
 const core = require('brewing-app-logic')
 const inventoryItemAdapter = require('inventory-item-adapter')
 
-const inventoryItem = core.getInventoryItemUseCase(inventoryItemAdapter.findInventoryItemById)("1")
+const inventoryItemPromise = core.getInventoryItemUseCase(inventoryItemAdapter.findInventoryItemById)("1")
 ```
 #### Get Inventory Items By Inventory Id
 **Description:** Passes the `inventoryId` to `findInventoryItemsByInventoryId` which returns an array of `inventoryItems`. 
@@ -352,7 +354,7 @@ const inventoryItem = core.getInventoryItemUseCase(inventoryItemAdapter.findInve
 const core = require('brewing-app-logc')
 const inventoryItemAdapter = require('inventory-item-adapter')
 
-const inventoryItem = core.getInventoryItemsByInventoryIdUseCase(inventoryItemAdapter.findInventoryItemsByInventoryId)("1")
+const inventoryItemPromise = core.getInventoryItemsByInventoryIdUseCase(inventoryItemAdapter.findInventoryItemsByInventoryId)("1")
 ```
 
 ### Update Inventory Item
@@ -370,7 +372,7 @@ const inventoryItem = core.getInventoryItemsByInventoryIdUseCase(inventoryItemAd
 const core = require('brewing-app-logc')
 const inventoryItemAdapter = require('inventory-item-adapter') 
 
-const updatedInventoryItem = updateInventoryItemUseCase(inventoryItemAdapter.findInventoryItemById)(inventoryItemAdapter.saveInventoryItem)("1", {currentQuantity: 1})
+const updatedInventoryItemPromise = updateInventoryItemUseCase(inventoryItemAdapter.findInventoryItemById)(inventoryItemAdapter.saveInventoryItem)("1", {currentQuantity: 1})
 ```
 
 #### Delete Inventory Item
@@ -385,7 +387,7 @@ const updatedInventoryItem = updateInventoryItemUseCase(inventoryItemAdapter.fin
 const core = require('brewing-app-logc')
 const inventoryItemAdapter = require('inventory-item-adapter') 
 
-const deletedInventoryItem = core.deleteInventoryItemUseCase(inventoryItemAdapter.deleteInventoryItem)("1")
+const deletedInventoryItemPromise = core.deleteInventoryItemUseCase(inventoryItemAdapter.deleteInventoryItem)("1")
 ```
 
 ### Timer Use Cases
@@ -404,7 +406,7 @@ const deletedInventoryItem = core.deleteInventoryItemUseCase(inventoryItemAdapte
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const timer = core.createTimerUseCase(timerAdapter.createTimer)("1", 1000, 500)
+const timerPromise = core.createTimerUseCase(timerAdapter.createTimer)("1", 1000, 500)
 ```
 
 #### Get Timer
@@ -419,7 +421,7 @@ const timer = core.createTimerUseCase(timerAdapter.createTimer)("1", 1000, 500)
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const timer = core.getTimerUseCase(timerAdapter.findTimerById)("1")
+const timerPromise = core.getTimerUseCase(timerAdapter.findTimerById)("1")
 ```
 
 #### Get Timers By User Id
@@ -435,7 +437,7 @@ const timer = core.getTimerUseCase(timerAdapter.findTimerById)("1")
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const timer = core.getTimersByUserIdUseCase(userAdapter.userExists)(timerAdapter.findTimersByUserId)("1")
+const timerPromise = core.getTimersByUserIdUseCase(userAdapter.userExists)(timerAdapter.findTimersByUserId)("1")
 ```
 
 #### Start Timer
@@ -451,7 +453,7 @@ const timer = core.getTimersByUserIdUseCase(userAdapter.userExists)(timerAdapter
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const startedTimer = core.startTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
+const startedTimerPromise = core.startTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
 ```
 #### Stop Timer
 **Description:** Passes the `timerId` to `findTimerById` which returns a timer entity. Creates a copy of the entity with the `isRunning` property set to `false`. Passes the `updatedTimer` to `saveTimer`. Returns the `updatedTimer`.
@@ -466,7 +468,7 @@ const startedTimer = core.startTimerUseCase(timerAdapter.findTimerById)(timerAda
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const stoppedTimer = core.stopTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
+const stoppedTimerPromise = core.stopTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
 ```
 
 #### Decrement Timer
@@ -482,7 +484,7 @@ const stoppedTimer = core.stopTimerUseCase(timerAdapter.findTimerById)(timerAdap
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const decrementedTimer = core.decrementTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
+const decrementedTimerPromise = core.decrementTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
 ```
 
 #### Reset Timer
@@ -498,7 +500,7 @@ const decrementedTimer = core.decrementTimerUseCase(timerAdapter.findTimerById)(
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const resetTimer = core.resetTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
+const resetTimerPromise = core.resetTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1")
 ```
 
 #### Update Timer
@@ -515,7 +517,7 @@ const resetTimer = core.resetTimerUseCase(timerAdapter.findTimerById)(timerAdapt
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const updatedTimer = core.updateTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1", {duration: 5000})
+const updatedTimerPromise = core.updateTimerUseCase(timerAdapter.findTimerById)(timerAdapter.saveTimer)("1", {duration: 5000})
 ```
 
 #### Delete Timer
@@ -530,7 +532,7 @@ const updatedTimer = core.updateTimerUseCase(timerAdapter.findTimerById)(timerAd
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const deletedTimer = core.deleteTimerUseCase(timerAdapter.deleteTimer)("1")
+const deletedTimerPromise = core.deleteTimerUseCase(timerAdapter.deleteTimer)("1")
 ```
 ### Timer Alert Use Cases
 ___
@@ -549,7 +551,7 @@ ___
 const core = require('brewing-app-logic')
 const timerAlertAdapter = require('timer-alert-adapter')
 
-const timerAlert = core.createTimerAlertUseCase(timerAlertAdapter.createTimerAlert)("1", 1000, "Hello")
+const timerAlertPromise = core.createTimerAlertUseCase(timerAlertAdapter.createTimerAlert)("1", 1000, "Hello")
 ```
 
 #### Get Timer Alert
@@ -564,7 +566,7 @@ const timerAlert = core.createTimerAlertUseCase(timerAlertAdapter.createTimerAle
 const core = require('brewing-app-logic')
 const timerAlertAdapter = require('timer-alert-adapter')
 
-const timerAlert = core.createTimerAlertUseCase(timerAlertAdapter.findTimerAlertById)("1", 1000, "Hello")
+const timerAlertPromise = core.createTimerAlertUseCase(timerAlertAdapter.findTimerAlertById)("1", 1000, "Hello")
 ```
 
 #### Get Timer Alerts By Timer Id
@@ -581,7 +583,7 @@ const core = require('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 const timerAlertAdapter = require('timer-alert-adapter')
 
-const timerAlerts = core.getTimerAlertsByTimerIdUseCase(timerAdapter.timerExists)(timerAlertAdapter.findTimerAlertsByTimerId)("1")
+const timerAlertsPromise = core.getTimerAlertsByTimerIdUseCase(timerAdapter.timerExists)(timerAlertAdapter.findTimerAlertsByTimerId)("1")
 ```
 
 #### Update Timer Alert
@@ -598,7 +600,7 @@ const timerAlerts = core.getTimerAlertsByTimerIdUseCase(timerAdapter.timerExists
 const core = require('brewing-app-logic')
 const timerAlertAdapter = require('timer-alert-adapter')
 
-const updatedTimerAlert = core.updateTimerAlertUseCase(timerAlertAdapter.findTimerAlertById)(timerAlertAdapter.saveTimerAlert)("1", {message: "Bye!"})
+const updatedTimerAlertPromise = core.updateTimerAlertUseCase(timerAlertAdapter.findTimerAlertById)(timerAlertAdapter.saveTimerAlert)("1", {message: "Bye!"})
 ```
 
 #### Activate Timer Alert
@@ -616,7 +618,7 @@ const core = require('brewing-app-logic')
 const timerAlertAdapter = require('timer-alert-adapter')
 const messageAdapter = require('message-adapter')
 
-const activatedTimerAlert = core.activateTimerAlertUseCase(timerAlertAdapter.findTimerAlertById)(timerAlertAdapter.saveTimerAlert)(messageAdapter.sendMessage)("1")
+const activatedTimerAlertPromise = core.activateTimerAlertUseCase(timerAlertAdapter.findTimerAlertById)(timerAlertAdapter.saveTimerAlert)(messageAdapter.sendMessage)("1")
 ```
 
 #### Delete Timer Alert
@@ -631,7 +633,7 @@ const activatedTimerAlert = core.activateTimerAlertUseCase(timerAlertAdapter.fin
 const core = require('brewing-app-logic')
 const timerAlertAdapter = require('timer-alert-adapter')
 
-const deletedTimerAlert = core.deleteTimerAlertUseCase(timerAlertAdatper.deleteTimerAlert)("1")
+const deletedTimerAlertPromise = core.deleteTimerAlertUseCase(timerAlertAdatper.deleteTimerAlert)("1")
 ```
 
 ### User Use Cases
@@ -651,7 +653,7 @@ const deletedTimerAlert = core.deleteTimerAlertUseCase(timerAlertAdatper.deleteT
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const user = core.createUserUseCase(userAdapter.isUserNameUnique)(userAdapter.createUser)(userAdapter.hashPassword)("user name", "password")
+const userPromise = core.createUserUseCase(userAdapter.isUserNameUnique)(userAdapter.createUser)(userAdapter.hashPassword)("user name", "password")
 ```
 #### Get User
 **Description:** Passes `userId` to `findUserById` which returns a user entity.
@@ -665,7 +667,7 @@ const user = core.createUserUseCase(userAdapter.isUserNameUnique)(userAdapter.cr
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const user = core.getUserUseCase(userAdapter.findUserById)("1")
+const userPromise = core.getUserUseCase(userAdapter.findUserById)("1")
 ```
 
 #### Update User
@@ -682,7 +684,7 @@ const user = core.getUserUseCase(userAdapter.findUserById)("1")
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const updatedUser = core.updateUserUseCase(userAdapter.findUserById)(userAdapter.saveUser)("1", {userName: "New name!"})
+const updatedUserPromise = core.updateUserUseCase(userAdapter.findUserById)(userAdapter.saveUser)("1", {userName: "New name!"})
 ```
 
 #### Authenticate User
@@ -699,7 +701,7 @@ const updatedUser = core.updateUserUseCase(userAdapter.findUserById)(userAdapter
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const authenticatedUser = core.authenticateUserUseCase(userAdapter.findUserByUsername)(userAdapter.hashPassword)("1", "password")
+const authenticatedUserPromise = core.authenticateUserUseCase(userAdapter.findUserByUsername)(userAdapter.hashPassword)("1", "password")
 ```
 
 #### Delete User
@@ -714,5 +716,5 @@ const authenticatedUser = core.authenticateUserUseCase(userAdapter.findUserByUse
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const deletedUser = core.deleteUserUseCase(userAdapter.deleteUser)("1")
+const deletedUserPromise = core.deleteUserUseCase(userAdapter.deleteUser)("1")
 ```
