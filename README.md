@@ -639,21 +639,23 @@ const deletedTimerAlertPromise = core.deleteTimerAlertUseCase(timerAlertAdatper.
 ### User Use Cases
 ---
 #### Create User
-**Description:** Passes `userName` to `isUserNameUnique` which returns a boolean. If `false` throws an error. If `true`, passes the `password` to `hashPassword` and creates a user entity with the `userName` and `hashedPassword`. Passes the entity to `_createUser` and returns the entity.
+**Description:** Passes `userName` to `isUserNameUnique` which returns a boolean. If `false` throws an error. If `true`, passes the `email` to `isEmailUnique` which returns a boolean. If `false` throws and error. If `true`, passes the `password` to `hashPassword` and creates a user entity with the `userName` and `hashedPassword`. Passes the entity to `_createUser` and returns the entity.
 
 **Arguments:**
 - isUserNameUnique: Function
+- isEmailUnique: Function
 - _createUser: Function
 - hashPassword: Function
 - userName: String
 - Password: String
+- email: String
 
 **Usage:**
 ```javascript
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const userPromise = core.createUserUseCase(userAdapter.isUserNameUnique)(userAdapter.createUser)(userAdapter.hashPassword)("user name", "password")
+const userPromise = core.createUserUseCase(userAdapter.isUserNameUnique)(userAdapter.isEmailUnique)(userAdapter.createUser)(userAdapter.hashPassword)("user name", "password", "me@example.com")
 ```
 #### Get User
 **Description:** Passes `userId` to `findUserById` which returns a user entity.
@@ -671,10 +673,12 @@ const userPromise = core.getUserUseCase(userAdapter.findUserById)("1")
 ```
 
 #### Update User
-**Description:** Passes `userId` to `findUserById` which returns a user entity. Creates a copy of the entity with the `updatePropsObj` merged in. Passes the updated user entity to `saveUser` and then returns it.
+**Description:** Passes `userId` to `findUserById` which returns a user entity. Creates a copy of the entity with the `updatePropsObj` merged in. Checks that the updated user has unique userName and email with `isUserNameUnique` and `isEmailUnique`. Throws an error if either is false. If true, Passes the updated user entity to `saveUser` and then returns it.
 
 **Arguments:**
 - findUserById: Function
+- isUserNameUnique: Function
+- isEmailUnique: Function
 - saveUser: Function
 - id: String
 - updatePropsObj: Object
@@ -684,7 +688,7 @@ const userPromise = core.getUserUseCase(userAdapter.findUserById)("1")
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const updatedUserPromise = core.updateUserUseCase(userAdapter.findUserById)(userAdapter.saveUser)("1", {userName: "New name!"})
+const updatedUserPromise = core.updateUserUseCase(userAdapter.findUserById)(userAdapter.isUserNameUnique)(userAdapter.isEmailUnique)(userAdapter.saveUser)("1", {userName: "New name!"})
 ```
 
 #### Authenticate User
