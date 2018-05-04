@@ -224,7 +224,8 @@ describe('user use cases', () => {
     const testUser = {
       id: "1",
       userName: "testUser",
-      hashedPassword: "hashedPassword"
+      hashedPassword: "hashedPassword",
+      email: "me@me.com"
     }
     
     const findUserById = userId => {
@@ -285,10 +286,13 @@ describe('user use cases', () => {
 
   describe('updateUser use case', () => {
 
+    //Add isUsernameUnique and isEmailUnique checks here
+
     const testUser = {
       id: "1",
       userName: "testUser",
-      password: "password"
+      password: "password",
+      email: "me@me.com"
     }
 
     let findUserByIdCalled = false
@@ -298,6 +302,22 @@ describe('user use cases', () => {
       findUserByIdCalled = true
       passedUserId = userId
       return testUser
+    }
+
+    let isUserNameUniqueCalled = false
+    let isUserNameUniqueArg = ""
+    const isUserNameUnique = userName => {
+      isUserNameUniqueCalled = true
+      isUserNameUniqueArg = userName
+      return true
+    }
+
+    let isEmailUniqueCalled = false
+    let isEmailUniqueArg = ""
+    const isEmailUnique = email => {
+      isEmailUniqueCalled = true
+      isEmailUniqueArg = email
+      return true
     }
 
     let saveUserCalled = false
@@ -310,12 +330,20 @@ describe('user use cases', () => {
 
     const userId = "1"
     const updatePropsObj = {userName: "testUser2"}
-    const updatedUserPromise = core.updateUserUseCase(findUserById)(saveUser)(userId, updatePropsObj)
+    const updatedUserPromise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)(saveUser)(userId, updatePropsObj)
 
     describe('happy path', () => {
 
       it('should return a func after passing findUserById', () => {
         core.updateUserUseCase(findUserById).should.be.a('function')
+      })
+
+      it('should return a func after passing isUserNameUnique', () => {
+        core.updateUserUseCase(findUserById)(isUserNameUnique).should.be.a('function')
+      })
+
+      it('should return a func after passing isEmailUnique', () => {
+        core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique).should.be.a('function')
       })
 
       it('should return a func after passing saveUser', () => {
@@ -328,6 +356,22 @@ describe('user use cases', () => {
 
       it('should pass userId arg to findUserById', () => {
         passedUserId.should.equal(userId)
+      })
+
+      it('should call isUserNameUnique func dependency', () => {
+        isUserNameUniqueCalled.should.equal(true)
+      })
+
+      it('should pass userName to isUserNameUnique', () => {
+        isUserNameUniqueArg.should.equal("testUser2")
+      })
+
+      it('should call isEmailUnique', () => {
+        isEmailUniqueCalled.should.equal(true)
+      })
+
+      it('should pass email to isEmailUnique', () => {
+        isEmailUniqueArg.should.equal(testUser.email)
       })
 
       it('should call saveUser func dependency', () => {
@@ -353,28 +397,40 @@ describe('user use cases', () => {
         })
       })
 
+      describe('when isUserNameUnique is wrong type', () => {
+        it('should throw a type error', () => {
+          expect(() => core.updateUserUseCase(findUserById)("isUsernameUnique")).to.throw(TypeError)
+        })
+      })
+
+      describe("when isEmailUnique is wrong type", () => {
+        it('should throw a TypeError', () => {
+          expect(() => core.updateUserUseCase(findUserById)(isUserNameUnique)("isEmailUnique")).to.throw(TypeError)
+        })
+      })
+
       describe('when saveUser is wrong type', () => {
         it('should throw a type error', () => {
-          expect(() => core.updateUserUseCase(findUserById)('saveUser')).to.throw(TypeError)
+          expect(() => core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)('saveUser')).to.throw(TypeError)
         })
       })
 
       describe('when userId is wrong type', () => {
         it('should throw a type error', () => {
-          const promise = core.updateUserUseCase(findUserById)(saveUser)(1, updatePropsObj)
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)(saveUser)(1, updatePropsObj)
           return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when updatePropsObj is wrong type', () => {
         it('should throw a type error', () => {
-          const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, "1")
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)(saveUser)(userId, "1")
           return promise.should.be.rejectedWith(TypeError)
         })
 
         describe('when an array', () => {
           it('should throw a type error', () => {
-            const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, [])
+            const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)(saveUser)(userId, [])
             return promise.should.be.rejectedWith(TypeError)
           })
         })
@@ -383,29 +439,61 @@ describe('user use cases', () => {
 
       describe('when updatePropsObj tries to update id', () => {
         it('should throw an error', () => {
-          const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, {id: "2"})
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)(saveUser)(userId, {id: "2"})
           return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when updatePropsObj tries to update props not on user', () => {
         it('should throw an error', () => {
-          const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, {foo: "bar"})
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)(saveUser)(userId, {foo: "bar"})
           return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when updatePropsObj tires to update props of wrong type', () => {
         it('should throw a type error', () => {
-          const promise = core.updateUserUseCase(findUserById)(saveUser)(userId, {userName: 2})
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)(saveUser)(userId, {userName: 2})
           return promise.should.be.rejectedWith(TypeError)
+        })
+      })
+
+      describe('when isUserNameUnique return false', () => {
+        it('should throw an error', () => {
+          const isUserNameUniqueFalse = () => false
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUniqueFalse)(isEmailUnique)(saveUser)(userId, updatePropsObj)
+          return promise.should.be.rejectedWith(Error)
+        })
+      })
+
+      describe('when isEmailUnique return false', () => {
+        it('should throw an error', () => {
+          const isEmailUniqueFalse = () => false
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUniqueFalse)(saveUser)(userId, updatePropsObj)
+          return promise.should.be.rejectedWith(Error)
         })
       })
 
       describe('when findUserById throws an error', () => {
         it('should throw an error', () => {
           const findUserByIdError = () => {throw new Error}
-          const promise = core.updateUserUseCase(findUserByIdError)(saveUser)(userId, updatePropsObj)
+          const promise = core.updateUserUseCase(findUserByIdError)(isUserNameUnique)(isEmailUnique)(saveUser)(userId, updatePropsObj)
+          return promise.should.be.rejectedWith(Error)
+        })
+      })
+
+      describe('when isUsernameUnique throws an error', () => {
+        it('should throw an error', () => {
+          const badIsUsernameUnique = () => {throw new Error}
+          const promise = core.updateUserUseCase(findUserById)(badIsUsernameUnique)(isEmailUnique)(saveUser)(userId, updatePropsObj)
+          return promise.should.be.rejectedWith(Error)
+        })
+      })
+
+      describe('when isEmailUnique throws an error', () => {
+        it('should throw an error', () => {
+          const badIsEmailUnique = () => {throw new Error}
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(badIsEmailUnique)(saveUser)(userId, updatePropsObj)
           return promise.should.be.rejectedWith(Error)
         })
       })
@@ -413,7 +501,7 @@ describe('user use cases', () => {
       describe('when saveUser throws an error', () => {
         it('should throw an error', () => {
           const saveUserError = () => {throw new Error}
-          const promise = core.updateUserUseCase(findUserById)(saveUserError)(userId, updatePropsObj)
+          const promise = core.updateUserUseCase(findUserById)(isUserNameUnique)(isEmailUnique)(saveUserError)(userId, updatePropsObj)
           return promise.should.be.rejectedWith(Error)
         })
       })
