@@ -7,10 +7,11 @@ describe('user entity factory function', () => {
 
   const userName = "testUser"
   const hashedPassword = "hashedpassword"
+  const email = "user@example.com"
 
   describe('happy path', () => {
 
-    const user = core.userEntity(userName, hashedPassword)
+    const user = core.userEntity(userName, hashedPassword, email)
 
     it('should return an object', () => {
       user.should.be.an('object')
@@ -22,7 +23,7 @@ describe('user entity factory function', () => {
     })
 
     it('should generate unique ids', () => {
-      const user2 = core.userEntity('testUser2', 'password')
+      const user2 = core.userEntity('testUser2', 'password', 'email@email.com')
       user2.id.should.not.equal(user.id)
     })
 
@@ -44,31 +45,51 @@ describe('user entity factory function', () => {
       user.hashedPassword.should.equal(hashedPassword)
     })
 
+    it('should have string property email', () => {
+      user.email.should.be.a('string')
+    })
+
+    it('should set emal equal to email arg', () => {
+      user.email.should.equal(email)
+    })
+
   })
 
   describe('error path', () => {
 
     describe('when userName is empty', () => {
       it('should throw an error', () => {
-        expect(() => core.userEntity('', hashedPassword)).to.throw()
+        expect(() => core.userEntity('', hashedPassword, email)).to.throw()
       })
     })
 
     describe('when userName is wrong type', () => {
       it('should throw a type error', () => {
-        expect(() => core.userEntity(2, hashedPassword)).to.throw(TypeError)
+        expect(() => core.userEntity(2, hashedPassword, email)).to.throw(TypeError)
       })
     })
 
     describe('when hashedPassword is empty', () => {
       it('should throw an error', () => {
-        expect(() => core.userEntity(userName, '')).to.throw()
+        expect(() => core.userEntity(userName, '', email)).to.throw()
       })
     })
 
     describe('when hashedPassword is of wrong type', () => {
       it('should throw a type error', () => {
-        expect(() => core.userEntity(userName, 12345678)).to.throw(TypeError)
+        expect(() => core.userEntity(userName, 12345678, email)).to.throw(TypeError)
+      })
+    })
+
+    describe('when email is empty', () => {
+      it('should throw an error', () => {
+        expect(() => core.userEntity(userName, hashedPassword, "")).to.throw()
+      })
+    })
+    
+    describe('when email is wrong type', () => {
+      it('should throw a TypeError', () => {
+        expect(() => core.userEntity(userName, hashedPassword, 1)).to.throw(TypeError)
       })
     })
 

@@ -24,6 +24,14 @@ describe('user use cases', () => {
       return !usernames.includes(userName)
     }
 
+    let isEmailUniqueCalled = false
+    let isEmailUniqueArg = ""
+    const isEmailUnique = email => {
+      isEmailUniqueCalled = true
+      isEmailUniqueArg = email
+      return true
+    }
+
     let hashPasswordCalled = false
     let hashPasswordPassedArg = ""
     const hashPassword = password => {
@@ -34,12 +42,25 @@ describe('user use cases', () => {
 
     const userName = "testUser"
     const password = "password"
-    const userPromise = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)
+    const email = "email@example.com"
+    const userPromise = core.createUserUseCase(isUserNameUnique)(isEmailUnique)(createUser)(hashPassword)(userName, password, email)
 
     describe('happy path', () => {
 
+      it('should return a function after isEmailUnique is injected', () => {
+        core.createUserUseCase(isUserNameUnique)(isEmailUnique).should.be.a('function')
+      })
+
+      it('should call isEmailUnique injected dependency', () => {
+        isEmailUniqueCalled.should.equal(true)
+      })
+
+      it('should pass email to isEmailUnique', () => {
+        isEmailUniqueArg.should.equal(email)
+      })
+
       it('should create a function after createUser is injected', () => {
-        core.createUserUseCase(isUserNameUnique)(createUser).should.be.a('function')
+        core.createUserUseCase(isUserNameUnique)(isEmailUnique)(createUser).should.be.a('function')
       })
 
       it('should call isUserNameUnique injected dependency', () => {
@@ -76,7 +97,7 @@ describe('user use cases', () => {
 
       it('should generate unique ids', async () => {
         const user = await userPromise
-        const userPromise2 = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)('testUser2', 'password')
+        const userPromise2 = core.createUserUseCase(isUserNameUnique)(isEmailUnique)(createUser)(hashPassword)('testUser2', 'password', "me@me.com")
         return userPromise2.should.eventually.have.property("id").not.equal(user.id)
       })
 
@@ -96,6 +117,14 @@ describe('user use cases', () => {
         return userPromise.should.eventually.have.property("hashedPassword").not.equal(password)
       })
 
+      it('should have string property email', () => {
+        return userPromise.should.eventually.have.property('email').be.a('string')
+      })
+
+      it('should have email property equal email arg', () => {
+        return userPromise.should.eventually.have.property('email').equal(email)
+      })
+
     })
 
     describe('error path', () => {
@@ -106,35 +135,47 @@ describe('user use cases', () => {
         })
       })
 
+      describe('when isEmailUnique is not a func', () => {
+        it('should throw a TypeError', () => {
+          expect(() => core.createUserUseCase(isUserNameUnique)("isEmailUnique")).to.throw(TypeError)
+        })
+      })
+
       describe('when createUser is not a func', () => {
         it('should throw a type error', () => {
-          expect(() => core.createUserUseCase(isUserNameUnique)("createUser")(hashPassword)).to.throw(TypeError)
+          expect(() => core.createUserUseCase(isUserNameUnique)(isEmailUnique)("createUser")(hashPassword)).to.throw(TypeError)
         })
       })
 
       describe('when hashPassword is not a func', () => {
         it('should throw a type error', () => {
-          expect(() => core.createUserUseCase(isUserNameUnique)(createUser)("hashPassword")).to.throw(TypeError)
+          expect(() => core.createUserUseCase(isUserNameUnique)(isEmailUnique)(createUser)("hashPassword")).to.throw(TypeError)
         })
       })
 
       describe('when userName is the wrong type', () => {
         it('should throw a type error', () => {
-          const promise = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(1, password)
+          const promise = core.createUserUseCase(isUserNameUnique)(isEmailUnique)(createUser)(hashPassword)(1, password, email)
           return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when userName is not unique', () => {
         it('should throw an error', () => {
-          const promise = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, password)
+          const promise = core.createUserUseCase(isUserNameUnique)(isEmailUnique)(createUser)(hashPassword)(userName, password, email)
           return promise.should.be.rejectedWith(Error)
+        })
+      })
+
+      describe('when email is not unique', () => {
+        it('should throw an error', () => {
+          const promise = core.createUserUseCase(isUserNameUnique)(() => false)(createUser)(hashPassword)("new user", password, email)
         })
       })
 
       describe('when password is the wrong type', () => {
         it('should throw a type error', () => {
-          const promise = core.createUserUseCase(isUserNameUnique)(createUser)(hashPassword)(userName, 1)
+          const promise = core.createUserUseCase(isUserNameUnique)(isEmailUnique)(createUser)(hashPassword)(userName, 1, email)
           return promise.should.be.rejectedWith(TypeError)
         })
       })
@@ -142,7 +183,15 @@ describe('user use cases', () => {
       describe('when isUserNameUnique fails', () => {
         it('should throw an error', () => {
           const badIsUsernameUnique = () => {throw new Error}
-          const promise = core.createUserUseCase(badIsUsernameUnique)(createUser)(hashPassword)(userName, password)
+          const promise = core.createUserUseCase(badIsUsernameUnique)(isEmailUnique)(createUser)(hashPassword)(userName, password, email)
+          return promise.should.be.rejectedWith(Error)
+        })
+      })
+
+      describe('when isEmailUnique fails', () => {
+        it('should throw an error', () => {
+          const badIsEmailUnique = () => {throw new Error}
+          const promise = core.createUserUseCase(isUserNameUnique)(badIsEmailUnique)(createUser)(hashPassword)(userName, password, email)
           return promise.should.be.rejectedWith(Error)
         })
       })
@@ -150,7 +199,7 @@ describe('user use cases', () => {
       describe('when createUser fails', () => {
         it('should throw an error', () => {
           const badCreateUser = () => {throw new Error}
-          const promise = core.createUserUseCase(isUserNameUnique)(badCreateUser)(hashPassword)(userName, password)
+          const promise = core.createUserUseCase(isUserNameUnique)(isEmailUnique)(badCreateUser)(hashPassword)(userName, password, email)
           return promise.should.be.rejectedWith(Error)
         })
       })
@@ -158,7 +207,7 @@ describe('user use cases', () => {
       describe('when hashPassword fails', () => {
         it('should throw an error', () => {
           const basHashPassword = () => {throw new Error}
-          const promise = core.createUserUseCase(isUserNameUnique)(createUser)(basHashPassword)(userName, password)
+          const promise = core.createUserUseCase(isUserNameUnique)(isEmailUnique)(createUser)(basHashPassword)(userName, password, email)
           return promise.should.be.rejectedWith(Error)
         })
       })
