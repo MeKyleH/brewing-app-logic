@@ -526,22 +526,22 @@ describe('user use cases', () => {
       return user
     }
 
-    let hashPasswordCalled = false
-    let hashPasswordArg = ""
-    const hashPassword = password => {
-      hashPasswordCalled = true
-      hashPasswordArg = password
+    let compareHashCalled = false
+    let compareHashArg = ""
+    const compareHash = password => {
+      compareHashCalled = true
+      compareHashArg = password
       if(password === 'badPassword'){
-        return "badHash"
+        return false
       }else{
-        return "hashedPassword"
+        return true
       }
     }
 
     const userName = "userName"
     const password = "password"
 
-    const authenticatedUserPromise = core.authenticateUserUseCase(findUserByUsername)(hashPassword)(userName, password)
+    const authenticatedUserPromise = core.authenticateUserUseCase(findUserByUsername)(compareHash)(userName, password)
 
     describe('happy path', () => {
 
@@ -549,8 +549,8 @@ describe('user use cases', () => {
         core.authenticateUserUseCase(findUserByUsername).should.be.a('function')
       })
 
-      it('should return a function after passing hashPassword', () => {
-        core.authenticateUserUseCase(findUserByUsername)(hashPassword).should.be.a("function")
+      it('should return a function after passing compareHash', () => {
+        core.authenticateUserUseCase(findUserByUsername)(compareHash).should.be.a("function")
       })
 
       it('should call findUserById injected dependency', () => {
@@ -561,12 +561,12 @@ describe('user use cases', () => {
         findUserByUsernameArg.should.equal(userName)
       })
 
-      it('should call hashPassword injected dependency', () => {
-        hashPasswordCalled.should.equal(true)
+      it('should call compareHash injected dependency', () => {
+        compareHashCalled.should.equal(true)
       })
 
-      it('should pass password arg to hashPassword', () => {
-        hashPasswordArg.should.equal(password)
+      it('should pass password arg to compareHash', () => {
+        compareHashArg.should.equal(password)
       })
 
       it('should return the user with the matching id', () => {
@@ -578,7 +578,7 @@ describe('user use cases', () => {
     describe('bad password path', () => {
 
       it('should return an error if the wrong password is given', () => {
-        expect(() => core.authenticateUserUseCase(findUserByUsername)(hashPassword)(userId, "badPassword")).to.throw()
+        expect(() => core.authenticateUserUseCase(findUserByUsername)(compareHash)(userId, "badPassword")).to.throw()
       })
 
     })
@@ -591,7 +591,7 @@ describe('user use cases', () => {
         })
       })
 
-      describe('when hashPassword is not a func', () => {
+      describe('when compareHash is not a func', () => {
         it('should throw a type error', () => {
           expect(() => core.authenticateUserUseCase(findUserByUsername)("badHash")).to.throw(TypeError)
         })
@@ -599,14 +599,14 @@ describe('user use cases', () => {
 
       describe('when userName is of wrong type', () => {
         it('should throw a type error', () => {
-          const promise = core.authenticateUserUseCase(findUserByUsername)(hashPassword)(1, password)
+          const promise = core.authenticateUserUseCase(findUserByUsername)(compareHash)(1, password)
           return promise.should.be.rejectedWith(TypeError)
         })
       })
 
       describe('when password is of wrong type', () => {
         it('should throw a type error', () => {
-          const promise = core.authenticateUserUseCase(findUserByUsername)(hashPassword)(userName, 1234)
+          const promise = core.authenticateUserUseCase(findUserByUsername)(compareHash)(userName, 1234)
           return promise.should.be.rejectedWith(TypeError)
         })
       })
@@ -614,11 +614,11 @@ describe('user use cases', () => {
       describe('when findUserByUsername fails', () => {
         it('should throw an error', () => {
           const badFindUser = () => {throw new Error}
-          expect(() => core.authenticateUserUseCase(badFindUser)(hashPassword)(userId, password)).to.throw()
+          expect(() => core.authenticateUserUseCase(badFindUser)(compareHash)(userId, password)).to.throw()
         })
       })
 
-      describe('when hashPassword fails', () => {
+      describe('when compareHash fails', () => {
         it('should throw an error', () => {
           const badHashPassword = () => {throw new Error}
           expect(() => core.authenticateUserUseCase(findUserByUsername)(badHashPassword)(userId, password)).to.throw()

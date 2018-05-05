@@ -692,11 +692,11 @@ const updatedUserPromise = core.updateUserUseCase(userAdapter.findUserById)(user
 ```
 
 #### Authenticate User
-**Description:** Passes `userName` to `findUserByUsername` which returns a user entity. Passes `password` to `hashPassword` which returns a hash. Compares the hash to the user entity's `hashedPassword` and returns the user if equal.
+**Description:** Passes `userName` to `findUserByUsername` which returns a user entity. Passes `password` to `compareHash` which returns a boolean. If true, returns the user.
 
 **Arguments:**
 - findUserByUsername: Function
-- hashPassword: Function
+- compareHash: Function
 - userName: String
 - password: String
 
@@ -705,7 +705,7 @@ const updatedUserPromise = core.updateUserUseCase(userAdapter.findUserById)(user
 const core = require('brewing-app-logic')
 const userAdapter = require('user-adapter')
 
-const authenticatedUserPromise = core.authenticateUserUseCase(userAdapter.findUserByUsername)(userAdapter.hashPassword)("1", "password")
+const authenticatedUserPromise = core.authenticateUserUseCase(userAdapter.findUserByUsername)(userAdapter.compareHash)("1", "password")
 ```
 
 #### Delete User
