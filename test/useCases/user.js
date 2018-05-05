@@ -527,10 +527,10 @@ describe('user use cases', () => {
     }
 
     let compareHashCalled = false
-    let compareHashArg = ""
-    const compareHash = password => {
+    let compareHashArgs = []
+    const compareHash = (password, hash) => {
       compareHashCalled = true
-      compareHashArg = password
+      compareHashArgs = [password, hash]
       if(password === 'badPassword'){
         return false
       }else{
@@ -566,7 +566,7 @@ describe('user use cases', () => {
       })
 
       it('should pass password arg to compareHash', () => {
-        compareHashArg.should.equal(password)
+        compareHashArgs.should.deep.equal([password, user.hashedPassword])
       })
 
       it('should return the user with the matching id', () => {
