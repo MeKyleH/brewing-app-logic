@@ -393,11 +393,12 @@ const deletedInventoryItemPromise = core.deleteInventoryItemUseCase(inventoryIte
 ### Timer Use Cases
 ---
 #### Create Timer
-**Description:** Creates a timer entity passing `userId, duration` and `intervalDuration`. Passes entity to `_createTimer`. Returns entity. 
+**Description:** Creates a timer entity passing `userId, name, duration` and `intervalDuration`. Passes entity to `_createTimer`. Returns entity. 
 
 **Arguments:**
 - _createTimer: Function
 - userId: String
+- name: String
 - duration: Number
 - intervalDuration: Number
 
@@ -406,7 +407,7 @@ const deletedInventoryItemPromise = core.deleteInventoryItemUseCase(inventoryIte
 const core = rquire('brewing-app-logic')
 const timerAdapter = require('timer-adapter')
 
-const timerPromise = core.createTimerUseCase(timerAdapter.createTimer)("1", 1000, 500)
+const timerPromise = core.createTimerUseCase(timerAdapter.createTimer)("1", "timer", 1000, 500)
 ```
 
 #### Get Timer
