@@ -14,7 +14,7 @@ describe('create timer use case', () => {
       createTimerArg = timer
     }
 
-    const timerPromise = core.createTimerUseCase(createTimer)("1", 1000, 500)
+    const timerPromise = core.createTimerUseCase(createTimer)("1", "timer", 1000, 500)
     
     it('should return a function after receiving createTimer', () => {
       core.createTimerUseCase(createTimer).should.be.a('function')
@@ -38,7 +38,7 @@ describe('create timer use case', () => {
 
     it('should generate unique ids', async () => {
       const timer = await timerPromise
-      return core.createTimerUseCase(createTimer)("1", 1000, 500).should.eventually.have.property("id").not.equal(timer.id)
+      return core.createTimerUseCase(createTimer)("1", "timer", 1000, 500).should.eventually.have.property("id").not.equal(timer.id)
     })
 
     it('should have string userId property', () => {
@@ -47,6 +47,14 @@ describe('create timer use case', () => {
 
     it('should have userId property equal to userId arg', () => {
       return timerPromise.should.eventually.have.property('userId').equal("1")
+    })
+
+    it('should have a string name property', () => {
+      return timerPromise.should.eventually.have.property("name").be.a("string")
+    })
+
+    it('should name property equal to name arg', () => {
+      return timerPromise.should.eventually.have.property("name").equal("timer")
     })
 
     it('should have number duration property', () => {
@@ -84,6 +92,13 @@ describe('create timer use case', () => {
       })
     })
 
+    describe("when name is not a string", () => {
+      it('should throw a TypeError', () => {
+        const promise = core.createTimerUseCase(createTimer)(1, 1)
+        return promise.should.be.rejectedWith(TypeError)
+      })
+    })
+
     describe('when duration is not a number', () => {
       it('should throw a TypeError', () => {
         const promise = core.createTimerUseCase(createTimer)("1", "1000")
@@ -114,6 +129,7 @@ describe('getTimer use case', () => {
 
   const testTimer = {
     id: "1",
+    name: "timer",
     duration: 1000,
     remainingDuration: 1000,
     intervalDuration: 500,
@@ -195,6 +211,7 @@ describe('getTimersByUserId use case', () => {
   const testTimers = [
     {
       id: "1",
+      name: "timer",
       duration: 1000,
       remainingDuration: 1000,
       intervalDuration: 500,
@@ -202,6 +219,7 @@ describe('getTimersByUserId use case', () => {
     },
     {
       id: "2",
+      name: "timer",
       duration: 1000,
       remainingDuration: 1000,
       intervalDuration: 500,
@@ -317,6 +335,7 @@ describe('start timer use case', () => {
       findTimerByIdArg = id
       return {
         id: "1",
+        name: "timer",
         duration: 1000,
         remainingDuration: 1000,
         intervalDuration: 1000,
@@ -418,6 +437,7 @@ describe('stop timer use case', () => {
       return {
         id: "1",
         duration: 1000,
+        name: "timer",
         remainingDuration: 1000,
         intervalDuration: 1000,
         isRunning: true
@@ -526,6 +546,7 @@ describe('decrement timer use case', () => {
       findTimerByIdArg = id
       return {
         id: "1",
+        name: "timer",
         duration: 1000,
         remainingDuration: 1000,
         intervalDuration: 1000,
@@ -636,6 +657,7 @@ describe('reset timer use case', () => {
       findTimerByIdArg = id
       return {
         id: "1",
+        name: "timer",
         duration: 1000,
         remainingDuration: 100,
         intervalDuration: 1000,
@@ -739,6 +761,7 @@ describe('update timer use case', () => {
 
   const timer = {
     id: "1",
+    name: "timer",
     duration: 1000,
     remainingDuration: 1000,
     intervalDuration: 500,
