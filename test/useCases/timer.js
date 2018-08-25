@@ -339,7 +339,8 @@ describe('start timer use case', () => {
         duration: 1000,
         remainingDuration: 1000,
         intervalDuration: 1000,
-        isRunning: false
+        isRunning: false,
+        startedAt: null
       }
     }
 
@@ -350,7 +351,9 @@ describe('start timer use case', () => {
       saveTimerArg = timer
     }
 
-    const startedTimerPromise = core.startTimerUseCase(findTimerById)(saveTimer)("1")
+    const date = Date.now()
+
+    const startedTimerPromise = core.startTimerUseCase(findTimerById)(saveTimer)("1", date)
 
     it('should call findTimerById', () => {
       findTimerByIdCalled.should.equal(true)
@@ -378,6 +381,10 @@ describe('start timer use case', () => {
 
     it('should have isRunning prop equal true', () => {
       return startedTimerPromise.should.eventually.have.property("isRunning").equal(true)
+    })
+
+    it("should have startedAt time equal to date arg", () => {
+      return startedTimerPromise.should.eventually.have.property("startedAt").equal(date)
     })
 
   })
@@ -440,7 +447,8 @@ describe('stop timer use case', () => {
         name: "timer",
         remainingDuration: 1000,
         intervalDuration: 1000,
-        isRunning: true
+        isRunning: true,
+        startedAt: Date.now()
       }
     }
 
@@ -487,6 +495,10 @@ describe('stop timer use case', () => {
 
     it('should have isRunning equal false', () => {
       return stoppedTimerPromise.should.eventually.have.property('isRunning').equal(false)
+    })
+
+    it('should have startedAt equal to null', () => {
+      return stoppedTimerPromise.should.eventually.have.property("startedAt").equal(null)
     })
 
   })
@@ -539,6 +551,8 @@ describe('decrement timer use case', () => {
   
   describe('happy path', () => {
 
+    const date = Date.now()
+
     let findTimerByIdCalled = false
     let findTimerByIdArg = ""
     const findTimerById = id => {
@@ -550,7 +564,8 @@ describe('decrement timer use case', () => {
         duration: 1000,
         remainingDuration: 1000,
         intervalDuration: 1000,
-        isRunning: true
+        isRunning: true,
+        startedAt: date - 10
       }
     }
 
@@ -561,7 +576,7 @@ describe('decrement timer use case', () => {
       saveTimerArg = timer
     }
 
-    const decrementedTimerPromise = core.decrementTimerUseCase(findTimerById)(saveTimer)("1")
+    const decrementedTimerPromise = core.decrementTimerUseCase(findTimerById)(saveTimer)("1", date)
 
     it('should return a function after receving findTimerById', () => {
       core.decrementTimerUseCase(findTimerById).should.be.a('function')
@@ -595,9 +610,9 @@ describe('decrement timer use case', () => {
       return decrementedTimerPromise.should.eventually.have.property("id").equal("1")
     })
 
-    it('should have remainingDuration equal to duration minus intervalDuration', () => {
+    it('should have remainingDuration equal to remainingDuration minus (Date.now() - timer.startedAt)', () => {
       const timer = findTimerById()
-      return decrementedTimerPromise.should.eventually.have.property('remainingDuration').equal(timer.duration - timer.intervalDuration)
+      return decrementedTimerPromise.should.eventually.have.property('remainingDuration').equal(timer.remainingDuration - (date - timer.startedAt))
     })
     
   })
