@@ -572,6 +572,104 @@ describe("activateTimerAlert use case", () => {
   })
 })
 
+describe("deactivateTimerAlert use case", () => {
+
+  let getTimerAlertByIdCalled = false
+  let getTimerAlertId = 0
+  let saveTimerCalled = false
+  let savedTimerAlert = {}
+  let sendMessageCalled = false
+  let sentMessage = ""
+
+  const dummyTimerAlert = {
+    id: "1",
+    name: "timerAlert",
+    message: "hello",
+    activated: true
+  }
+
+  const getTimerAlertById = timerAlertId => {
+    getTimerAlertByIdCalled = true
+    getTimerAlertId = timerAlertId
+    return dummyTimerAlert
+  }
+
+  const saveTimerAlert = timerAlert => {
+    saveTimerCalled = true
+    savedTimerAlert = timerAlert
+  }
+
+  describe('happy path', () => {
+
+    const deactivateTimerAlert = core.deactivateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)
+    const deactivatedTimerAlertPromise = deactivateTimerAlert("1")
+
+    it('should call getTimerAlertId injected dependency', () => {
+      getTimerAlertByIdCalled.should.equal(true)
+    })
+
+    it('should call getTimerAlertById with passed timerId', () => {
+      getTimerAlertId.should.equal("1")
+    })
+
+    it('should call saveTimerAlert injected dependency', () => {
+      saveTimerCalled.should.equal(true)
+    })
+
+    it('should pass deactivatedTimerAlert to saveTimer', () => {
+      return deactivatedTimerAlertPromise.should.eventually.deep.equal(savedTimerAlert)
+    })
+
+    it('should return new timerAlert with activated false', () => {
+      return deactivatedTimerAlertPromise.should.eventually.have.property('activated').equal(false)
+    })
+
+  })
+
+  describe('error path', () => {
+    describe('when injected dependencies arent funcs', () => {
+      it('should throw a type error', () => {
+        expect(() => core.activateTimerAlertUseCase("getTimerAlertById")(saveTimerAlert)).to.throw(TypeError)
+        expect(() => core.activateTimerAlertUseCase(getTimerAlertById)("saveTimerAlert")).to.throw(TypeError)
+      })
+    })
+
+    describe('if timerAlertId is wrong type', () => {
+
+      const deactivateTimerAlert = core.deactivateTimerAlertUseCase(getTimerAlertById)(saveTimerAlert)
+
+      it('should throw a type error', () => {
+        const promise = deactivateTimerAlert(1)
+        return promise.should.be.rejectedWith(Error)
+      })
+    })
+
+    describe('when getTimerAlertById throws error', () => {
+      it('should throw error', () => {
+        const getTimerAlertByIdError = () => {throw new Error}
+        const promise = core.deactivateTimerAlertUseCase(getTimerAlertByIdError)(saveTimerAlert)("1")
+        return promise.should.be.rejectedWith(Error)
+      })
+    })
+
+    describe('when getTimerAlertById returns nothing', () => {
+      it('should throw an error', () => {
+        const getTimerAlertByIdNull = () => {}
+        expect(() => core.deactivateTimerAlertUseCase(getTimerAlertByIdNull)(saveTimerAlert)("1").to.throw())
+      })
+    })
+
+    describe('when saveTimerAlert throws an error', () => {
+      it('should throw an error', () => {
+        const saveTimerAlertError = () => {throw new Error}
+        const promise = core.deactivateTimerAlertUseCase(getTimerAlertById)(saveTimerAlertError)("1")
+        return promise.should.be.rejectedWith(Error)
+      })
+    })
+
+  })
+})
+
 describe('delete timerAlert use case', () => {
 
   let deleteTimerAlertCalled = false
