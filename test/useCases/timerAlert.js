@@ -689,12 +689,12 @@ describe('delete timerAlert use case', () => {
       deleteTimerAlertCalled.should.equal(true)
     })
 
-    it('should pass timerId to deleteFunc', () => {
+    it('should pass timerAlertId to deleteFunc', () => {
       deleteTimerAlertId.should.equal(id)
     })
 
-    it('should return null', () => {
-      return deletedTimerAlertPromise.should.eventually.be.a('null')
+    it('should return deleted timer alert id', () => {
+      return deletedTimerAlertPromise.should.eventually.have.property("id").equal(id)
     })
 
   })
