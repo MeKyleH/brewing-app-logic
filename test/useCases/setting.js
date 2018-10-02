@@ -93,4 +93,70 @@ describe.only("setting use cases", () => {
 
 	})
 
+	describe("getSetting", () => {
+
+		describe("happy path", () => {
+
+			let findSettingByIdCalled = false
+			let findSettingByIdArg = 1
+			const findSettingById = id => {
+				findSettingByIdCalled = true
+				findSettingByIdArg = id
+				return {id}
+			}
+			const getSettingUseCase = core.getSettingUseCase
+			const getSettng = getSettingUseCase(findSettingById)
+			const id = "1"
+			const setting = getSettng(id)
+
+			it("return a function after accepting findSettingById arg", () => {
+				getSettingUseCase(findSettingById).should.be.a("function")
+			})
+
+			it("returns a promise", () => {
+				setting.should.be.a("promise")
+			})
+
+			it("calls findSettingById", () => {
+				findSettingByIdCalled.should.equal(true)
+			})
+
+			it("passes the id arg to find setting by id", () => {
+				findSettingByIdArg.should.equal(id)
+			})
+
+			it("returns the setting with id equal to id arg", () => {
+				return setting.should.eventually.have.property("id").equal(id)
+			})
+
+		})
+
+		describe("error path", () => {
+
+			const getSettingUseCase = core.getSettingUseCase
+			const getSetting = getSettingUseCase(() => {})
+
+			describe("when findSettingById is not a function", () => {
+				it("should throw a TypeError", () => {
+					expect(() => getSettingUseCase(1)).to.throw(TypeError)
+				})
+			})
+
+			describe("when id is not a string", () => {
+				it("should throw a TypeError", () => {
+					expect(getSetting(1)).to.be.rejectedWith(TypeError)
+				})
+			})
+
+			describe("when findSettingById throws an error", () => {
+				it('should throw an Error', () => {
+					const badFunc = () => {throw new Error}
+					expect(getSettingUseCase(badFunc)("1")).to.be.rejectedWith(Error)
+				})
+			})
+
+		})
+
+	})
+
 })
