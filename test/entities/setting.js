@@ -3,7 +3,7 @@ const should = chai.should()
 const expect = chai.expect
 const core = require('../../lib')
 
-describe.only("setting factory", () => {
+describe("setting factory", () => {
 
 	const userId = "1"
 	const name = "quantityUnits"
