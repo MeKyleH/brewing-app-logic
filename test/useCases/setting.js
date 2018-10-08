@@ -3,7 +3,7 @@ const should = chai.should()
 const expect = chai.expect
 const core = require('../../lib')
 
-describe.only("setting use cases", () => {
+describe("setting use cases", () => {
 
 	describe("createSetting", () => {
 
@@ -152,6 +152,174 @@ describe.only("setting use cases", () => {
 				it('should throw an Error', () => {
 					const badFunc = () => {throw new Error}
 					expect(getSettingUseCase(badFunc)("1")).to.be.rejectedWith(Error)
+				})
+			})
+
+		})
+
+	})
+
+	describe("updateSetting", () => {
+
+		const updateSettingUseCase = core.updateSettingUseCase
+
+		describe("happy path", () => {
+
+			let findSettingByIdCalled = false
+			let findSettingByIdArg = ""
+
+			const setting = {
+				id: "1",
+				userId: "1",
+				name: "setting",
+				value: false
+			}
+
+			const findSettingById = id => {
+				findSettingByIdCalled = true
+				findSettingByIdArg = id
+				return Promise.resolve(setting)
+			}
+
+			let saveSettingArg = {}
+			const saveSetting = setting => {
+				saveSettingArg = setting
+			}
+			const updateSetting = updateSettingUseCase(findSettingById)(saveSetting)
+			const id = "1"
+			const value = true
+			const updatedSetting = updateSetting(id, value)
+
+			it("returns a function after accepting the findSettingById argument", () => {
+				updateSettingUseCase(findSettingById).should.be.a("function")
+			})
+
+			it("should return a function after accepting the saveSetting argument", () => {
+				updateSettingUseCase(findSettingById)(saveSetting).should.be.a("function")
+			})
+
+			it("returns a promise", () => {
+				updatedSetting.should.be.a("promise")
+			})
+
+			it("calls findSettingById", () => {
+				findSettingByIdCalled.should.equal(true)
+			})
+
+			it("should pass the id arg to findSettingById", () => {
+				findSettingByIdArg.should.equal(id)
+			})
+
+			it("should update the setting's value to the value argument and pass it to saveSetting", () => {
+				return updatedSetting.should.eventually.deep.equal(saveSettingArg)
+			})
+
+			it("should return the new setting", () => {
+				return updatedSetting.should.eventually.deep.equal(Object.assign({}, setting, { value }))
+			})
+
+		})
+
+		describe("error path", () => {
+
+			const updateSetting = updateSettingUseCase(() => {})(() => {})
+
+			describe("when findSettingById is not a function", () => {
+				it("should throw a TypeError", () => {
+					expect(() => updateSettingUseCase("1")).to.throw(TypeError)
+				})
+			})
+
+			describe("when saveSetting is not a function", () => {
+				it("should throw a TypeError", () => {
+					expect(() => updateSettingUseCase(() => {})("1")).to.throw(TypeError)
+				})
+			})
+
+			describe("when id is not of type string", () => {
+				it("should throw a TypeError", () => {
+					expect(updateSetting(1)).to.be.rejectedWith(TypeError)
+				})
+			})
+
+			describe("when findSettingById throws an error", () => {
+				it("should catch the error", () => {
+					const badFunc = () => {throw new Error}
+					const updateSetting = updateSettingUseCase(badFunc)(() => {})
+					expect(updateSetting("1")).to.be.rejectedWith(Error)
+				})
+			})
+
+			describe("when saveSetting throws an error", () => {
+				it("should catch the error", () => {
+					const badFunc = () => {throw new Error}
+					const updateSetting = updateSettingUseCase(() => {})(badFunc)
+					expect(updateSetting("1")).to.be.rejectedWith(Error)
+				})
+			})
+
+		})
+
+	})
+
+	describe("deleteSetting", () => {
+
+		const deleteSettingUseCase = core.deleteSettingUseCase
+
+		describe("happy path", () => {
+
+			let deleteSettingCalled = false
+			let deleteSettingArg = ""
+			const deleteSetting = id => {
+				deleteSettingCalled = true
+				deleteSettingArg = id
+				return Promise.resolve(null)
+			}
+			const id = "1"
+			const deleteSettingFunc = deleteSettingUseCase(deleteSetting)
+			const deletedSetting = deleteSettingFunc(id)
+
+			it("should return a function after accepting deleteSetting arg", () => {
+				deleteSettingUseCase(deleteSetting).should.be.a("function")
+			})
+
+			it("should return a promise", () => {
+				deletedSetting.should.be.a("promise")
+			})
+
+			it("should call deleteSetting", () => {
+				deleteSettingCalled.should.equal(true)
+			})
+
+			it("should pass the id to deleteSetting", () => {
+				deleteSettingArg.should.equal(id)
+			})
+
+			it("should return null", () => {
+				return deletedSetting.should.eventually.equal(null)
+			})
+
+		})
+
+		describe("error path", () => {
+
+			describe("When deleteSetting is not a function", () => {
+				it("should throw a TypeError", () => {
+					expect(() => deleteSettingUseCase("")).to.throw(TypeError)
+				})
+			})
+
+			describe("when id is not a string", () => {
+				it("should throw a TypeError", () => {
+					expect(deleteSettingUseCase(() => {})(1)).to.be.rejectedWith(TypeError)
+				})
+			})
+
+			describe("when deleteSetting throws an error", () => {
+				it("should throw an error with same message", () => {
+					const message = 'Bad function!'
+					const badFunc = () => {throw new Error(message)}
+					expect(deleteSettingUseCase(badFunc)("1")).to.be.rejectedWith(Error, message)
 				})
 			})
 
