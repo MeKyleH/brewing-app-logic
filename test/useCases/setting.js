@@ -159,6 +159,120 @@ describe("setting use cases", () => {
 
 	})
 
+	describe("getSettingByUserId", () => {
+
+		const getSettingsByUserIdUseCase = core.getSettingsByUserIdUseCase
+
+		let userExistsCalled = false
+		let userExistsArg = ""
+		const userExists = userId => {
+			userExistsCalled = true
+			userExistsArg = userId
+			return true
+		}
+
+		let findSettingsByUserIdCalled = false
+		let findSettingsByUserIdArg = ""
+		const findSettingsByUserIdReturn = [
+			{
+				id: "1",
+				userId: "1",
+				name: "setting",
+				value: true
+			}
+		]
+		const findSettingsByUserId = id => {
+			findSettingsByUserIdCalled = true
+			findSettingsByUserIdArg = id
+			return Promise.resolve(findSettingsByUserIdReturn)
+		}
+
+		describe("happy path", () => {
+
+			const userId = "1"
+			const settings = getSettingsByUserIdUseCase(userExists)(findSettingsByUserId)(userId)
+			const emptySettings = getSettingsByUserIdUseCase(() => false)(findSettingsByUserId)(userId)
+
+			it("returns a function after accepting the userExists arg", () => {
+				getSettingsByUserIdUseCase(userExists).should.be.a("function")
+			})
+
+			it("returns a function after accepting the findSettingsByUserId arg", () => {
+				getSettingsByUserIdUseCase(userExists)(findSettingsByUserId).should.be.a("function")
+			})
+
+			it("should call userExists", () => {
+				userExistsCalled.should.equal(true)
+			})
+ 
+			it("should pass userId arg to userExists", () => {
+				userExistsArg.should.equal(userId)
+			})
+
+			it("should call findSettingsByUserId", () => {
+				findSettingsByUserIdCalled.should.equal(true)
+			})
+
+			it("should pass the userId to findSettingsByUserId", () => {
+				findSettingsByUserIdArg.should.equal(userId)
+			})
+
+			it("should return a promise", () => {
+				settings.should.be.a("promise")
+			})
+
+			it("should resolve to an array", () => {
+				return settings.should.eventually.be.an("array")
+			})
+
+			it("should resolve to return value of findSettingsByUserId", () => {
+				return settings.should.eventually.equal(findSettingsByUserIdReturn)
+			})
+
+			it("should return an empty array if userExists returns false", () => {
+				return emptySettings.should.eventually.have.property("length").equal(0)
+			})
+
+		})
+
+		describe("error path", () => {
+
+			describe("when userExists is not a function", () => {
+				it("should throw a TypeError", () => {
+					expect(() => getSettingsByUserIdUseCase("")).to.throw(TypeError)
+				})
+			})
+
+			describe("when findSettingsByUserId is not a function", () => {
+				it("should throw a TypeError", () => {
+					expect(() => getSettingsByUserIdUseCase(() => {})("")).to.throw(TypeError)
+				})
+			})
+
+			describe("when userId is not a string", () => {
+				it("should throw a TypeError", () => {
+					expect(getSettingsByUserIdUseCase(() => {})(() => {})(1)).to.be.rejectedWith(TypeError)
+				})
+			})
+
+			describe("when userExists throws an error", () => {
+				it("should catch the error", () => {
+					const badFunc = () => {throw Error("bad func")}
+					expect(getSettingsByUserIdUseCase(badFunc)(() => {})("1")).to.be.rejectedWith(Error)
+				})
+			})
+
+			describe("when findSettingsByUserId throws an error", () => {
+				it("should catch the error", () => {
+					const badFunc = () => {throw new Error}
+					expect(getSettingsByUserIdUseCase(() => true)(badFunc)("1")).to.be.rejectedWith(Error)
+				})
+			})
+
+		})
+
+	})
+
 	describe("updateSetting", () => {
 
 		const updateSettingUseCase = core.updateSettingUseCase
