@@ -820,6 +820,23 @@ describe('update timer use case', () => {
 
   })
 
+  describe("edge cases", () => {
+
+    describe("when the timer's duration is updated to a value less than the remaining duration", () => {
+
+      it("should set the remainingDuration equal to the new duration value", () => {
+        const findTimerById = id => timer
+        const saveTimer = () => {}
+        const id = "1"
+        const updateDurationObj = {duration: 500}
+        const updatedTimerPromise = core.updateTimerUseCase(findTimerById)(saveTimer)(id, updateDurationObj)
+        return updatedTimerPromise.should.eventually.deep.equal(Object.assign({}, timer, {duration: 500, remainingDuration: 500}))
+      })
+
+    })
+
+  })
+
   describe('error path', () => {
 
     const updateTimerUseCaseWithDeps = core.updateTimerUseCase(findTimerById)(saveTimer)
